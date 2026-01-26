@@ -1,81 +1,59 @@
 package game;
 
-import city.cs.engine.*;
+import city.cs.engine.BodyImage;
+import city.cs.engine.BoxShape;
 import city.cs.engine.Shape;
+import city.cs.engine.StaticBody;
+import city.cs.engine.UserView;
+import city.cs.engine.Walker;
+import city.cs.engine.World;
+import javax.swing.JFrame;
 import org.jbox2d.common.Vec2;
 
-import javax.swing.JFrame;
-
-import java.awt.*;
-import java.io.IOException;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
-/**
- * Your main game entry point
- */
 public class Game {
-
-
-    /** Initialise a new Game. */
     public Game() {
-
-        //1. make an empty game world
         World world = new World();
 
-        //2. populate it with bodies (ex: platforms, collectibles, characters)
-
-        //make a ground platform
-        Shape shape = new BoxShape(30, 0.5f);
+        // --- Ground & Platform ---
+        Shape shape = new BoxShape(11.0F, 0.5F);
         StaticBody ground = new StaticBody(world, shape);
-        ground.setPosition(new Vec2(0f, -11.5f));
+        ground.setPosition(new Vec2(0.0F, -11.5F));
 
-        // make a suspended platform
-        Shape platformShape = new BoxShape(3, 0.5f);
+        Shape platformShape = new BoxShape(3.5F, 0.5F);
         StaticBody platform1 = new StaticBody(world, platformShape);
-        platform1.setPosition(new Vec2(-8, -4f));
+        platform1.setPosition(new Vec2(-8.0F, 5.5F));
 
-        //make a character (with an overlaid image)
-        Shape studentShape = new BoxShape(1,2);
-        DynamicBody student = new DynamicBody(world, studentShape);
-        student.setPosition(new Vec2(4,-5));
-        student.addImage(new BodyImage("data/student.png", 4));
+        // --- Student ---
+        Shape studentShape = new BoxShape(1.0F, 2.0F);
+        Walker student = new Walker(world, studentShape);
+        student.setPosition(new Vec2(7.0F, -9.0F));
+        // Add the initial image so they aren't invisible at start
+        student.addImage(new BodyImage("data/idle.png", 4.0F));
 
-
-        //3. make a view to look into the game world
+        // --- View ---
         UserView view = new UserView(world, 500, 500);
 
+        // --- Controller Connection ---
+        StudentController controller = new StudentController(student);
+        view.addKeyListener(controller);   // Listens for keys
+        world.addStepListener(controller); // Listens for physics steps (for animation)
 
-        //optional: draw a 1-metre grid over the view
-         view.setGridResolution(1);
-
-
-        //4. create a Java window (frame) and add the game
-        //   view to it
-        final JFrame frame = new JFrame("City Game");
+        // --- Window Setup ---
+        JFrame frame = new JFrame("City Game");
         frame.add(view);
-
-        // enable the frame to quit the application
-        // when the x button is pressed
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(3);
         frame.setLocationByPlatform(true);
-        // don't let the frame be resized
         frame.setResizable(false);
-        // size the frame to fit the world view
         frame.pack();
-        // finally, make the frame visible
         frame.setVisible(true);
 
-        //optional: uncomment this to make a debugging view
-         JFrame debugView = new DebugViewer(world, 500, 500);
+        // Important: Focus the view so keyboard works immediately
+        view.requestFocus();
 
-        // start our game world simulation!
         world.start();
     }
 
-    /** Run the game. */
     public static void main(String[] args) {
-
         new Game();
     }
 }
