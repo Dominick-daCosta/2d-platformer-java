@@ -47,7 +47,7 @@ public class Game {
 
 
         //optional: draw a 1-metre grid over the view
-        // view.setGridResolution(1);
+         view.setGridResolution(1);
 
 
         //4. create a Java window (frame) and add the game
