@@ -1,6 +1,7 @@
 package game;
 
 import city.cs.engine.BodyImage;
+import city.cs.engine.AttachedImage;
 import city.cs.engine.BoxShape;
 import city.cs.engine.Shape;
 import city.cs.engine.StaticBody;
@@ -14,31 +15,34 @@ public class Game {
     public Game() {
         World world = new World();
 
-        // --- Ground & Platform ---
+        // Ground & Platform
         Shape shape = new BoxShape(11.0F, 0.5F);
         StaticBody ground = new StaticBody(world, shape);
         ground.setPosition(new Vec2(0.0F, -11.5F));
 
         Shape platformShape = new BoxShape(3.5F, 0.5F);
         StaticBody platform1 = new StaticBody(world, platformShape);
-        platform1.setPosition(new Vec2(-8.0F, 5.5F));
+        platform1.setPosition(new Vec2(-0.0F, -5.0F));
 
-        // --- Student ---
-        Shape studentShape = new BoxShape(1.0F, 2.0F);
-        Walker student = new Walker(world, studentShape);
-        student.setPosition(new Vec2(7.0F, -9.0F));
-        // Add the initial image so they aren't invisible at start
-        student.addImage(new BodyImage("data/idle.png", 4.0F));
 
-        // --- View ---
+        // Knight
+        Shape knightShape = new BoxShape(1.0F, 2.0F);
+        Walker knight = new Walker(world, knightShape);
+        knight.setPosition(new Vec2(7.0F, -9.0F));
+        knight.addImage(new BodyImage("data/idle.png", 4.0F));
+
+
+        // Creates a View
         UserView view = new UserView(world, 500, 500);
 
-        // --- Controller Connection ---
-        StudentController controller = new StudentController(student);
-        view.addKeyListener(controller);   // Listens for keys
-        world.addStepListener(controller); // Listens for physics steps (for animation)
 
-        // --- Window Setup ---
+        // Make The Controller
+        KnightController controller = new KnightController(knight);
+        view.addKeyListener(controller);   // Checks for key press
+        world.addStepListener(controller); // Checks the movment
+
+
+        // Make The Window
         JFrame frame = new JFrame("City Game");
         frame.add(view);
         frame.setDefaultCloseOperation(3);
@@ -46,9 +50,8 @@ public class Game {
         frame.setResizable(false);
         frame.pack();
         frame.setVisible(true);
+        view.requestFocus(); //Focus the view so keyboard works immediately
 
-        // Important: Focus the view so keyboard works immediately
-        view.requestFocus();
 
         world.start();
     }

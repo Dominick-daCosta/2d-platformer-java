@@ -1,6 +1,7 @@
 package game;
 
 import city.cs.engine.BodyImage;
+import city.cs.engine.AttachedImage; // IMPORT THIS!
 import city.cs.engine.StepEvent;
 import city.cs.engine.StepListener;
 import city.cs.engine.Walker;
@@ -8,81 +9,99 @@ import org.jbox2d.common.Vec2;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class StudentController extends KeyAdapter implements StepListener {
-    private Walker student;
+public class KnightController extends KeyAdapter implements StepListener {
+    private Walker knight;
 
-    // IMAGES: Ensure these file names match your actual files exactly!
+    // Images
     private BodyImage idleImage = new BodyImage("data/idle.png", 4.0f);
     private BodyImage jumpImage = new BodyImage("data/jump.png", 4.0f);
     private BodyImage fallImage = new BodyImage("data/falling.png", 4.0f);
 
     private String currentState = "idle";
 
-    public StudentController(Walker student) {
-        this.student = student;
+    private boolean facingRight = true;
+    private boolean lastFacingRight = true;
+
+    public KnightController(Walker knight) {
+        this.knight = knight;
     }
 
-    // --- KEYBOARD INPUT ---
+    // Keyboard Input
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
 
-        // Move Left (Arrow or A)
+        // Move Left
         if (code == KeyEvent.VK_LEFT || code == KeyEvent.VK_A) {
-            student.startWalking(-4);
+            knight.startWalking(-7);
+            facingRight = false;
         }
-        // Move Right (Arrow or D)
+
+        // Move Right
         else if (code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D) {
-            student.startWalking(4);
+            knight.startWalking(7);
+            facingRight = true;
         }
-        // Jump (Arrow or W)
-        else if (code == KeyEvent.VK_UP || code == KeyEvent.VK_W) {
-            student.jump(8);
+
+        // Jump
+        else if (code == KeyEvent.VK_SPACE) {
+            knight.jump(12);
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         int code = e.getKeyCode();
-        // Stop walking if left or right keys are released
+
+        //Stop Movment
         if (code == KeyEvent.VK_LEFT || code == KeyEvent.VK_A ||
                 code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D) {
-            student.stopWalking();
+            knight.stopWalking();
         }
     }
 
-    // --- ANIMATION LOGIC (Runs 60 times/sec) ---
     @Override
     public void preStep(StepEvent stepEvent) {
-        Vec2 velocity = student.getLinearVelocity();
+        Vec2 velocity = knight.getLinearVelocity();
         String newState = "idle";
 
         // Check vertical speed to determine state
-        if (velocity.y > 0.5) {
+        if (velocity.y > 0.001) {
             newState = "jump";
-        } else if (velocity.y < -0.5) {
+        } else if (velocity.y < -0.001) {
             newState = "fall";
         } else {
             newState = "idle";
         }
 
-        // Only swap images if the state changes (saves performance)
-        if (!newState.equals(currentState)) {
-            student.removeAllImages();
+        // Only swap images if the state changes
+
+        if (!newState.equals(currentState) || facingRight != lastFacingRight) {
+
+            knight.removeAllImages();
+            AttachedImage img = null;
+
 
             if (newState.equals("jump")) {
-                student.addImage(jumpImage);
+                img = knight.addImage(jumpImage);
+
             } else if (newState.equals("fall")) {
-                student.addImage(fallImage);
+                img = knight.addImage(fallImage);
+
             } else {
-                student.addImage(idleImage);
+                img = knight.addImage(idleImage);
+            }
+
+
+            if (!facingRight) {
+                img.flipHorizontal();
             }
 
             currentState = newState;
         }
     }
 
-    @Override
-    public void postStep(StepEvent stepEvent) {
-    }
+        @Override
+        public void postStep (StepEvent stepEvent){
+        }
 }
