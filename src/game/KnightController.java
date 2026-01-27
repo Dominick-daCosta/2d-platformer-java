@@ -17,6 +17,14 @@ public class KnightController extends KeyAdapter implements StepListener {
     private BodyImage jumpImage = new BodyImage("data/jump.png", 4.0f);
     private BodyImage fallImage = new BodyImage("data/falling.png", 4.0f);
 
+    private BodyImage[] walkImages = {
+            new BodyImage("data/walk 1.png", 4.0f),
+            new BodyImage("data/walk 2.png", 4.0f),
+            //new BodyImage("data/walk 3.png", 4.0f),
+            //new BodyImage("data/walk 4.png", 4.0f)
+    };
+
+    //Setting Defult Vriables
     private String currentState = "idle";
 
     private boolean facingRight = true;
@@ -25,9 +33,13 @@ public class KnightController extends KeyAdapter implements StepListener {
     private boolean leftPressed = false;
     private boolean rightPressed = false;
 
+    private int stepCount = 0;
+
     public KnightController(Walker knight) {
         this.knight = knight;
     }
+
+
 
     // Keyboard Input
     @Override
@@ -104,22 +116,30 @@ public class KnightController extends KeyAdapter implements StepListener {
         Vec2 velocity = knight.getLinearVelocity();
         String newState = "idle";
 
+        stepCount = stepCount + 1;
+
         // Check vertical speed to determine state
         if (velocity.y > 0.001) {
             newState = "jump";
         } else if (velocity.y < -0.001) {
             newState = "fall";
+        } else if (Math.abs(velocity.x) > 0.1) {
+                newState = "walk";
         } else {
             newState = "idle";
         }
 
+
         // Only swap images if the state changes
 
-        if (!newState.equals(currentState) || facingRight != lastFacingRight) {
+        if (!newState.equals(currentState) || facingRight != lastFacingRight || newState.equals("walk")) {
+
+            if (newState.equals("walk") && newState.equals(currentState) && stepCount % 10 != 0) {
+                return; // only chnages the frame every 5 frames
+            }
 
             knight.removeAllImages();
             AttachedImage img = null;
-
 
             if (newState.equals("jump")) {
                 img = knight.addImage(jumpImage);
@@ -127,16 +147,21 @@ public class KnightController extends KeyAdapter implements StepListener {
             } else if (newState.equals("fall")) {
                 img = knight.addImage(fallImage);
 
+            } else if (newState.equals("walk")) {
+                int frameIndex = (stepCount / 10) % 2;
+                img = knight.addImage(walkImages[frameIndex]);
+
             } else {
                 img = knight.addImage(idleImage);
             }
 
-
+            // Flip if facing left
             if (!facingRight) {
                 img.flipHorizontal();
             }
 
             currentState = newState;
+            lastFacingRight = facingRight;
         }
     }
 
