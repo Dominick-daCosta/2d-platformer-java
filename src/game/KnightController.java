@@ -22,6 +22,9 @@ public class KnightController extends KeyAdapter implements StepListener {
     private boolean facingRight = true;
     private boolean lastFacingRight = true;
 
+    private boolean leftPressed = false;
+    private boolean rightPressed = false;
+
     public KnightController(Walker knight) {
         this.knight = knight;
     }
@@ -33,14 +36,14 @@ public class KnightController extends KeyAdapter implements StepListener {
 
         // Move Left
         if (code == KeyEvent.VK_LEFT || code == KeyEvent.VK_A) {
-            knight.startWalking(-7);
-            facingRight = false;
+            leftPressed = true;
+            startMoving();
         }
 
         // Move Right
         else if (code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D) {
-            knight.startWalking(7);
-            facingRight = true;
+            rightPressed = true;
+            startMoving();
         }
 
         // Jump
@@ -53,12 +56,48 @@ public class KnightController extends KeyAdapter implements StepListener {
     public void keyReleased(KeyEvent e) {
         int code = e.getKeyCode();
 
-        //Stop Movment
-        if (code == KeyEvent.VK_LEFT || code == KeyEvent.VK_A ||
-                code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D) {
-            knight.stopWalking();
+        if (code == KeyEvent.VK_LEFT || code == KeyEvent.VK_A) {
+            leftPressed = false;
+            startMoving();
+        }
+
+        else if (code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_D) {
+            rightPressed = false;
+            startMoving();
+
         }
     }
+
+
+
+    //Controls if moving or not
+    private void startMoving() {
+        if (leftPressed && rightPressed) {
+            stopMovingInstant();
+        }
+
+        else if (leftPressed) {
+            knight.startWalking(-7);
+            facingRight = false;
+        }
+
+        else if (rightPressed) {
+            knight.startWalking(7);
+            facingRight = true;
+        }
+
+        else {
+            stopMovingInstant();
+        }
+    }
+
+    private void stopMovingInstant() {
+        knight.stopWalking();
+        knight.setLinearVelocity(new Vec2(0, knight.getLinearVelocity().y));
+    }
+
+
+
 
     @Override
     public void preStep(StepEvent stepEvent) {

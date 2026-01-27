@@ -1,6 +1,7 @@
 package game;
 
 import city.cs.engine.BodyImage;
+import city.cs.engine.SolidFixture;
 import city.cs.engine.AttachedImage;
 import city.cs.engine.BoxShape;
 import city.cs.engine.Shape;
@@ -24,13 +25,20 @@ public class Game {
         StaticBody platform1 = new StaticBody(world, platformShape);
         platform1.setPosition(new Vec2(-0.0F, -5.0F));
 
+        StaticBody platform2 = new StaticBody(world, platformShape);
+        platform2.setPosition(new Vec2(-8.0F, 1.0F));
+
+        StaticBody platform3 = new StaticBody(world, platformShape);
+        platform3.setPosition(new Vec2(8.0F, 1.0F));
+
 
         // Knight
         Shape knightShape = new BoxShape(1.0F, 2.0F);
         Walker knight = new Walker(world, knightShape);
         knight.setPosition(new Vec2(7.0F, -9.0F));
         knight.addImage(new BodyImage("data/idle.png", 4.0F));
-
+        SolidFixture fixture = (SolidFixture)knight.getFixtureList().get(0);
+        fixture.setFriction(0.0f);
 
         // Creates a View
         UserView view = new UserView(world, 500, 500);
