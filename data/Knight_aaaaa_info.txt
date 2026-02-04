@@ -1,0 +1,13 @@
+version: 2
+type: animation
+name: Fall
+consistent_sprite_size: true
+enable_borders: false
+use_sprite_name: false
+sprites: 6
+0	Fall_000.png
+1	Fall_001.png
+2	Fall_002.png
+3	Fall_003.png
+4	Fall_004.png
+5	Fall_005.png
