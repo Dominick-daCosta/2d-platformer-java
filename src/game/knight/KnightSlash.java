@@ -1,4 +1,4 @@
-package game;
+package game.knight;
 
 import city.cs.engine.*;
 import org.jbox2d.common.Vec2;
@@ -43,24 +43,23 @@ public class KnightSlash extends StaticBody {
         new GhostlyFixture(this, shapeBot);
 
         // Give it an invisible immage to fix random blocks appearing
-        //BodyImage invisibleImg = new BodyImage("data/knight sprites/invisible.png", 1.0f);
-        //this.addImage(invisibleImg);
+        BodyImage invisibleImg = new BodyImage("data/knight sprites/invisible.png", 1.0f);
+        this.addImage(invisibleImg);
 
         // 1. Set Position
-        // We trust the Controller to give us the correct X,Y position now
         this.setPosition(position);
 
-        // 2. Set Rotation based on State
+        // Rotate hitbox
         if (state.equals("upSlash")) {
-            this.setAngleDegrees(90); // Points UP
+            this.setAngleDegrees(90);
 
         } else if (state.equals("downSlash")) {
-            this.setAngleDegrees(-90); // Points DOWN (same as 270)
+            this.setAngleDegrees(-90);
 
         } else {
             // Normal Side Slash
             if (!facingRight) {
-                this.setAngleDegrees(180); // Flip to point LEFT
+                this.setAngleDegrees(180);
             }
         }
     }

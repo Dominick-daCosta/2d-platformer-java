@@ -4,8 +4,12 @@ import city.cs.engine.*;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
+
+import game.crawler.Crawler;
+import game.crawler.CrawlerController;
 import org.jbox2d.common.Vec2;
 import java.awt.Color;
+import game.knight.*;
 
 public class Game {
     public Game() {
@@ -33,14 +37,27 @@ public class Game {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+        // PLACES CHARACTERS
+
         // KNIGHT
         Knight knight = new Knight(world);
 
-        // Add the Initial Image (Optional, or handle inside controller)
+        // Add the Initial Image
         knight.addImage(new BodyImage("data/knight sprites/idle 1.png", 4.0F));
 
 
-/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Crawler
+        Crawler enemy = new Crawler(world);
+
+        // Add the Initial Image
+        knight.addImage(new BodyImage("data/crawler sprites/walk 1.png", 4.0F));
+
+        enemy.setPosition(new Vec2(0, 0));
+        CrawlerController enemyAI = new CrawlerController(enemy, 3.0f);
+        world.addStepListener(enemyAI);
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         // VEIW

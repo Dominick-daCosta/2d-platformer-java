@@ -1,4 +1,4 @@
-    package game;
+    package game.knight;
 
     import city.cs.engine.*;
     import java.awt.event.MouseListener;
@@ -238,38 +238,47 @@
                 switch (newState) {
                     case "slash":
                         img = slash(timeInState);
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "upSlash":
                         img = upSlash(timeInState);
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "downSlash":
                         img = downSlash(timeInState);
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "jump":
                         img = jump(timeInState);
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "fall":
                         img = fall();
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "walk":
                         img = walk();
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "lookUp":
                         img = lookUp();
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "lookDown":
                         img = lookDown();
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     default: // Idle
                         img = idle();
+                        img.setOffset(new Vec2(0, 0.2f));
                         break;
                 }
 
@@ -488,7 +497,7 @@
 
                 else if (newState.equals("downSlash")) {
                     offsetX = 0.5f;
-                    offsetY = -2.2f;  
+                    offsetY = -2.2f;
                 }
 
                 else {

@@ -1,4 +1,4 @@
-package game;
+package game.knight;
 
 import city.cs.engine.*;
 import org.jbox2d.common.Vec2;
@@ -17,6 +17,10 @@ public class Knight extends Walker {
 
     public Knight(World world) {
         super(world, shapeMain);
+
+        BodyImage knightImg = new BodyImage("data/knight sprites/idle 1.png", 6.0f);
+        AttachedImage img = this.addImage(knightImg);
+        img.setOffset(new Vec2(0, 0.4f));
 
         this.setPosition(new Vec2(7.0f, -9.0f));
 
