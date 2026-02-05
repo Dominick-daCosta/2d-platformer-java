@@ -33,7 +33,7 @@ public class KnightSlash extends StaticBody {
             1.18f, -0.66f
     );
 
-    public KnightSlash(World world, Vec2 position, boolean facingRight) {
+    public KnightSlash(World world, Vec2 position, String state, boolean facingRight) {
         super(world);
 
         // Add the shapes
@@ -43,17 +43,25 @@ public class KnightSlash extends StaticBody {
         new GhostlyFixture(this, shapeBot);
 
         // Give it an invisible immage to fix random blocks appearing
-        BodyImage invisibleImg = new BodyImage("data/knight sprites/invisible.png", 1.0f);
-        this.addImage(invisibleImg);
+        //BodyImage invisibleImg = new BodyImage("data/knight sprites/invisible.png", 1.0f);
+        //this.addImage(invisibleImg);
 
-        // Position Logic
-        if (facingRight) {
-            this.setPosition(position);
+        // 1. Set Position
+        // We trust the Controller to give us the correct X,Y position now
+        this.setPosition(position);
+
+        // 2. Set Rotation based on State
+        if (state.equals("upSlash")) {
+            this.setAngleDegrees(90); // Points UP
+
+        } else if (state.equals("downSlash")) {
+            this.setAngleDegrees(-90); // Points DOWN (same as 270)
+
         } else {
-            // Facing Left
-            // Since we moved the shape closer to the center, we reduce the offset here too
-            this.setAngleDegrees(180);
-            this.setPosition(new Vec2(position.x - 1.0f, position.y + 1.0f));
+            // Normal Side Slash
+            if (!facingRight) {
+                this.setAngleDegrees(180); // Flip to point LEFT
+            }
         }
     }
 }

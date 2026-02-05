@@ -48,6 +48,24 @@ public class KnightAssets extends KeyAdapter {
             new BodyImage("data/knight sprites/fall 6.png", 5.5f),
     };
 
+    protected BodyImage[] knightLookUpImages = {
+            new BodyImage("data/knight sprites/look up 1.png", 5.5f),
+            new BodyImage("data/knight sprites/look up 2.png", 5.5f),
+            new BodyImage("data/knight sprites/look up 3.png", 5.5f),
+            new BodyImage("data/knight sprites/look up 4.png", 5.5f),
+            new BodyImage("data/knight sprites/look up 5.png", 5.5f),
+            new BodyImage("data/knight sprites/look up 6.png", 5.5f),
+    };
+
+    protected BodyImage[] knightLookDownImages = {
+            new BodyImage("data/knight sprites/look down 1.png", 5.5f),
+            new BodyImage("data/knight sprites/look down 2.png", 5.5f),
+            new BodyImage("data/knight sprites/look down 3.png", 5.5f),
+            new BodyImage("data/knight sprites/look down 4.png", 5.5f),
+            new BodyImage("data/knight sprites/look down 5.png", 5.5f),
+            new BodyImage("data/knight sprites/look down 6.png", 5.5f),
+    };
+
     protected BodyImage[] knightSlashImages = {
             new BodyImage("data/knight sprites/slash 1.png", 5.5f),
             new BodyImage("data/knight sprites/slash 2.png", 5.5f),
