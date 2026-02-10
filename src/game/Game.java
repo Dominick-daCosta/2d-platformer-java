@@ -14,14 +14,14 @@ import game.knight.*;
 public class Game {
     public Game() {
         World world = new World();
-        world.setGravity(35.0f);
+        world.setGravity(60.0f);
 
-        new DebugViewer(world, 500, 500);
+        new DebugViewer(world, 1024, 567);
 
         // Ground & Platform
-        Shape shape = new BoxShape(11.0F, 0.5F);
+        Shape shape = new BoxShape(30.0F, 1.0F);
         StaticBody ground = new StaticBody(world, shape);
-        ground.setPosition(new Vec2(0.0F, -11.5F));
+        ground.setPosition(new Vec2(0.0F, -13.5F));
 
         Shape platformShape = new BoxShape(3.5F, 0.5F);
         StaticBody platform1 = new StaticBody(world, platformShape);
@@ -45,6 +45,9 @@ public class Game {
         // Add the Initial Image
         knight.addImage(new BodyImage("data/knight sprites/idle 1.png", 4.0F));
 
+        // Collision Listener
+        knight.addCollisionListener(new KnightCollision(knight));
+
 
         // Crawler
         Crawler enemy = new Crawler(world);
@@ -63,7 +66,7 @@ public class Game {
         // VEIW
 
         // Creates a View
-        UserView view = new UserView(world, 500, 500);
+        GameView view = new GameView(world, knight, 1024, 567);
         view.setBackground(Color.LIGHT_GRAY);
 
 

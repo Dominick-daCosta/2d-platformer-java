@@ -1,0 +1,10 @@
+version: 2
+type: animation
+name: V_DownToEmpty
+consistent_sprite_size: true
+enable_borders: false
+use_sprite_name: false
+sprites: 3
+0	V_DownToEmpty_000.png
+1	V_DownToEmpty_001.png
+2	V_DownToEmpty_002.png

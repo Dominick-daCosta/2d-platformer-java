@@ -1,6 +1,8 @@
     package game.knight;
 
     import city.cs.engine.*;
+    import city.cs.engine.Fixture;
+    import java.util.List;
     import java.awt.event.MouseListener;
     import java.awt.event.MouseEvent;
     import org.jbox2d.common.Vec2;
@@ -8,7 +10,7 @@
     import java.awt.event.KeyEvent;
 
     public class KnightController extends KnightAssets implements StepListener, MouseListener {
-        private Walker knight;
+        private Knight knight;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,6 +27,7 @@
         private boolean upPressed = false;
         private boolean downPressed = false;
 
+        private int jumpPower = 34;
 
         private int stepCount = 0;
         private int stateStartTime = 0;
@@ -35,7 +38,7 @@
         private static final int COMBO_TOLERANCE = 20;
         private KnightSlash currentSlashBox = null;
 
-        public KnightController(Walker knight) {
+        public KnightController(Knight knight) {
             this.knight = knight;
         }
 
@@ -99,7 +102,7 @@
 
             // Jump
             else if (code == KeyEvent.VK_SPACE) {
-                knight.jump(25);
+                knight.jump(jumpPower);
             }
         }
 
@@ -129,8 +132,17 @@
             else if (code == KeyEvent.VK_DOWN || code == KeyEvent.VK_S) {
                 downPressed = false;
             }
-        }
 
+            // Jump Control
+            else if (code == KeyEvent.VK_SPACE) {
+                Vec2 v = knight.getLinearVelocity();
+
+                // If let go of space bar and going up slow down
+                if (v.y > 0.1f) {
+                    knight.setLinearVelocity(new Vec2(v.x, v.y * 0.5f));
+                }
+            }
+        }
 
         // Controls if moving or not
         private void startMoving() {
@@ -173,7 +185,10 @@
             stepCount++;
 
             // Determine Current State
-            if (isSlashing) {
+            if (knight.getHealth() <= 0) {
+                newState = "death";
+
+            }else if (isSlashing) {
                 if (upPressed) {
                     newState = "upSlash";
 
@@ -184,7 +199,7 @@
                     newState = "slash";
                 }
 
-        }else if (velocity.y > 0.001) {
+            }else if (velocity.y > 0.001) {
                 newState = "jump";
 
             } else if (velocity.y < -0.001) {
@@ -267,13 +282,18 @@
                         break;
 
                     case "lookUp":
-                        img = lookUp();
+                        img = lookUp(timeInState);
                         img.setOffset(new Vec2(0, 0.2f));
                         break;
 
                     case "lookDown":
-                        img = lookDown();
+                        img = lookDown(timeInState);
                         img.setOffset(new Vec2(0, 0.2f));
+                        break;
+
+                    case "death":
+                        img = die(timeInState);
+                        img.setOffset(new Vec2(0, 3.0f));
                         break;
 
                     default: // Idle
@@ -300,8 +320,11 @@
             return state.equals("walk") || state.equals("fall") || state.equals("idle") ||
                     state.equals("jump") || state.equals("slash") ||
                     state.equals("lookUp") || state.equals("lookDown") ||
-                    state.equals("upSlash") || state.equals("downSlash");
+                    state.equals("upSlash") || state.equals("downSlash") ||
+                    state.equals("death");
         }
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -440,25 +463,76 @@
 
 
         // Look Up
-        public AttachedImage lookUp (){
-            int knightLookUpIndex = (stepCount / 10) % knightLookUpImages.length;
-            return knight.addImage(knightLookUpImages[knightLookUpIndex]);
+        public AttachedImage lookUp (int timeInState){
+            int frameIndex = timeInState / 10;
+            int indexToRender;
+
+            if (frameIndex == 0) { // If first frame
+                indexToRender = 0; // Play it once
+            }
+            else {
+                int loopLength = knightLookUpImages.length - 1;
+
+                // (rawIndex - 1) -> Shifts time so 0 is the start of the loop
+                // % loopLength   -> Cycles through the remaining frames
+                // + 1            -> Shifts the result back up to skip Frame 0
+                indexToRender = 1 + ((frameIndex - 1) % loopLength);
+            }
+
+            return knight.addImage(knightLookUpImages[indexToRender]);
         }
 
 
 
         // Look down
-        public AttachedImage lookDown (){
+        public AttachedImage lookDown (int timeInState){
             int knightLookDownIndex = (stepCount / 10) % knightLookDownImages.length;
-            return knight.addImage(knightLookDownImages[knightLookDownIndex]);
-        }
 
+            int frameIndex = timeInState / 10;
+            int indexToRender;
+
+            if (frameIndex == 0) { // If first frame
+                indexToRender = 0; // Play it once
+            }
+            else {
+                int loopLength = knightLookDownImages.length - 1;
+
+                // (rawIndex - 1) -> Shifts time so 0 is the start of the loop
+                // % loopLength   -> Cycles through the remaining frames
+                // + 1            -> Shifts the result back up to skip Frame 0
+                indexToRender = 1 + ((frameIndex - 1) % loopLength);
+            }
+            return knight.addImage(knightLookDownImages[indexToRender]);
+        }
 
 
         // Idle
         public AttachedImage idle (){
             int knightIdleIndex = (stepCount / 10) % knightIdleImages.length;
             return knight.addImage(knightIdleImages[knightIdleIndex]);
+        }
+
+        // Die
+        public AttachedImage die (int timeInState){
+            int frameIndex = timeInState / 5;
+
+            knight.stopWalking();
+            knight.setLinearVelocity(new Vec2(0,0)); // Stops movment
+
+            knight.removeAllCollisionListeners(); // Stops Colision
+            knight.setGravityScale(0); // Stops Gravity
+
+            knight.removeAllCollisionListeners();
+
+
+
+            // Death Animation
+            if (frameIndex >= knightDeathImages.length) {
+                frameIndex = knightDeathImages.length - 1;
+                knight.destroy();
+            }
+
+            return knight.addImage(knightDeathImages[frameIndex]);
         }
 
 

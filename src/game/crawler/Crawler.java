@@ -5,6 +5,15 @@ import org.jbox2d.common.Vec2;
 
 public class Crawler extends Walker {
 
+    // Initialise Variables
+
+    private int damage = 1;
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // HitBoxes
     private static final Shape topShape = new PolygonShape(
             1.15f, 0.1f,   // Top Right
             -0.92f, 0.1f,  // Top Left
@@ -25,6 +34,16 @@ public class Crawler extends Walker {
 
         BodyImage crawlerImg = new BodyImage("data/crawler sprites/walk 1.png", 4.0f);
         AttachedImage img = this.addImage(crawlerImg);
-
     }
+
+    // Return Damage it Deals
+    public int getDamage() {
+        return damage;
+    }
+
+
+
+
+
+
 }

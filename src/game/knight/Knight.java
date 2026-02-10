@@ -3,10 +3,20 @@ package game.knight;
 import city.cs.engine.*;
 import org.jbox2d.common.Vec2;
 
+import java.util.List;
+
 public class Knight extends Walker {
 
+    // Initialise variables
+
+    private int health;
+    private int maxHealth = 5;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // Hitbox
-    private static final Shape shapeMain = new PolygonShape(
+    private static final Shape knightHitbox = new PolygonShape(
             -0.66f, -1.60f, //Bottom left side
             -0.14f, -2.6f, // Bottom left foot
             0.32f, -2.6f, // Bottom right foot
@@ -16,7 +26,8 @@ public class Knight extends Walker {
     );
 
     public Knight(World world) {
-        super(world, shapeMain);
+        super(world, knightHitbox);
+        this.health = maxHealth;
 
         BodyImage knightImg = new BodyImage("data/knight sprites/idle 1.png", 6.0f);
         AttachedImage img = this.addImage(knightImg);
@@ -26,7 +37,66 @@ public class Knight extends Walker {
 
         // Friction
         SolidFixture mainFixture = (SolidFixture) this.getFixtureList().get(0);
-        mainFixture.setFriction(0.0f);
-
+        mainFixture.setFriction(0.01f);
     }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // HEALTH
+
+    public void takeDamage(int damage) {
+        health = health - damage;
+
+        if (health <= 0) {
+            die();
+        }
+    }
+
+
+    // Death Logic
+
+    public void die() {
+
+        List<Fixture> fixtures = this.getFixtureList(); // Gets Everything Thr Knight has
+
+        // Destroys all of those things
+        for (int i = fixtures.size() - 1; i >= 0; i--) {
+            Fixture f = fixtures.get(i);
+            f.destroy();
+        }
+    }
+
+
+
+
+    public int getHealth() {
+            return health;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
