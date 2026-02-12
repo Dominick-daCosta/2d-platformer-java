@@ -69,7 +69,7 @@ public class Knight extends Walker {
 
 
 
-    public int getHealth() {
+    public int knightGetHealth() {
             return health;
         }
 

@@ -3,12 +3,17 @@ package game.crawler;
 import city.cs.engine.*;
 import org.jbox2d.common.Vec2;
 
+import java.util.List;
+
 public class Crawler extends Walker {
 
     // Initialise Variables
 
     private int damage = 1;
+    private int health = 5;
 
+    private long lastHitTime = 0;
+    private static final int invisFrames = 500;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -41,9 +46,47 @@ public class Crawler extends Walker {
         return damage;
     }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Health
+
+    public void takeDamage(int damage) {
+
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastHitTime <= invisFrames){ // invis frames
+            return;
+        }
+
+        // Take damage
+        health = health - damage;
+        lastHitTime = currentTime;
 
 
+        // Death
+        if (health <= 0) {
+            die();
+        }
+    }
 
 
+    public void die() {
+        List<Fixture> fixtures = this.getFixtureList(); // Gets Everything The Crawler has
+
+        // Destroys all of those things
+        for (int i = fixtures.size() - 1; i >= 0; i--) {
+            Fixture f = fixtures.get(i);
+            f.destroy();
+        }
+    }
+
+    public int crawlerGetHealth() {
+        return health;
+    }
+
+    public boolean isInvincible(){
+        long currentTime = System.currentTimeMillis();
+        return (currentTime - lastHitTime) <= invisFrames; // if this statment is true then the method returns true
+    }
 
 }

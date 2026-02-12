@@ -1,12 +1,9 @@
     package game.knight;
 
     import city.cs.engine.*;
-    import city.cs.engine.Fixture;
-    import java.util.List;
     import java.awt.event.MouseListener;
     import java.awt.event.MouseEvent;
     import org.jbox2d.common.Vec2;
-    import java.awt.event.KeyAdapter;
     import java.awt.event.KeyEvent;
 
     public class KnightController extends KnightAssets implements StepListener, MouseListener {
@@ -185,7 +182,7 @@
             stepCount++;
 
             // Determine Current State
-            if (knight.getHealth() <= 0) {
+            if (knight.knightGetHealth() <= 0) {
                 newState = "death";
 
             }else if (isSlashing) {
@@ -551,7 +548,8 @@
             // Create Hitbox
             if (justStarted) {
                 // Set Default
-                currentSlashBox = new KnightSlash(knight.getWorld(), knight.getPosition(), newState, facingRight);            }
+                currentSlashBox = new KnightSlash(knight.getWorld(), knight.getPosition(), newState, facingRight, knight);
+            }
 
             // Destroy Hitbox When Finished
             if (justStopped && currentSlashBox != null) {

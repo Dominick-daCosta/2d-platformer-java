@@ -3,7 +3,7 @@ package game.knight;
 import city.cs.engine.*;
 import org.jbox2d.common.Vec2;
 
-public class KnightSlash extends StaticBody {
+public class KnightSlash extends DynamicBody {
 
 
     private static final Shape shapeTop = new PolygonShape(
@@ -33,20 +33,21 @@ public class KnightSlash extends StaticBody {
             1.18f, -0.66f
     );
 
-    public KnightSlash(World world, Vec2 position, String state, boolean facingRight) {
+    public KnightSlash(World world, Vec2 position, String state, boolean facingRight, Knight knight ) {
         super(world);
 
         // Add the shapes
-        new GhostlyFixture(this, shapeTop);
-        new GhostlyFixture(this, shapeTopMid);
-        new GhostlyFixture(this, shapeBotMid);
-        new GhostlyFixture(this, shapeBot);
+        new SolidFixture(this, shapeTop);
+        new SolidFixture(this, shapeTopMid);
+        new SolidFixture(this, shapeBotMid);
+        new SolidFixture(this, shapeBot);
 
         // Give it an invisible immage to fix random blocks appearing
         BodyImage invisibleImg = new BodyImage("data/knight sprites/invisible.png", 1.0f);
         this.addImage(invisibleImg);
 
         // 1. Set Position
+        this.setGravityScale(0);
         this.setPosition(position);
 
         // Rotate hitbox
@@ -62,5 +63,7 @@ public class KnightSlash extends StaticBody {
                 this.setAngleDegrees(180);
             }
         }
+
+        this.addCollisionListener(new KnightSlashCollision(knight, state));
     }
 }

@@ -20,7 +20,7 @@ public class GameView extends UserView {
     @Override
     protected void paintForeground(Graphics2D g) {
 
-        int currentHealth = knight.getHealth();
+        int currentHealth = knight.knightGetHealth();
         int maxHealth = 5;
 
 
