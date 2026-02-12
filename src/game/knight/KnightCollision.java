@@ -2,6 +2,7 @@ package game.knight;
 
 import city.cs.engine.*;
 import game.crawler.Crawler;
+import org.jbox2d.common.Vec2;
 
 public class KnightCollision implements CollisionListener {
 
@@ -19,7 +20,7 @@ public class KnightCollision implements CollisionListener {
             Crawler enemy = (Crawler) e.getOtherBody();
             int damageToTake = enemy.getDamage(); // Checks the damage the enemy does
             knight.takeDamage(damageToTake);
-            knight.jump(20);
+            knight.setLinearVelocity(new Vec2(5, 10)); // Knockback
         }
     }
 }

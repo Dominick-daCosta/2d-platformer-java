@@ -35,6 +35,13 @@
         private static final int COMBO_TOLERANCE = 20;
         private KnightSlash currentSlashBox = null;
 
+        private boolean isDashing = false;
+        private int startDashTime;
+        private int dashDuration = 15;
+        private int dashCooldown = 20;
+        private int lastDashEndTime = -100;
+        private float dashSpeed = 25.0f;
+
         public KnightController(Knight knight) {
             this.knight = knight;
         }
@@ -101,6 +108,14 @@
             else if (code == KeyEvent.VK_SPACE) {
                 knight.jump(jumpPower);
             }
+
+            // Dash
+            else if (code == KeyEvent.VK_SHIFT) {
+                if (!isDashing && (stepCount - lastDashEndTime) > dashCooldown) { // Dash Cooldown (cant spam it)
+                    startDashTime = stepCount;
+                    isDashing = true;
+                }
+            }
         }
 
         // IS a Key Released
@@ -141,7 +156,9 @@
             }
         }
 
-        // Controls if moving or not
+        // MOVEMENT
+
+        // Walking
         private void startMoving() {
             if (leftPressed && rightPressed) {
                 stopMovingInstant();
@@ -168,6 +185,29 @@
             knight.setLinearVelocity(new Vec2(0, knight.getLinearVelocity().y));
         }
 
+        // Dash
+        private void dashMovment(){
+            if (!isDashing) return;
+
+            int timeDashed = stepCount - startDashTime;
+
+            if (timeDashed < dashDuration) { // Dashing
+
+                knight.setGravityScale(0.0f); // Turn off gravity
+                float direction = facingRight ? 1.0f : -1.0f; // Set Direction
+
+                knight.setLinearVelocity(new Vec2(dashSpeed * direction, 0));
+            }
+
+            else { // End Dash
+                isDashing = false;
+                knight.setGravityScale(1.0f); // Turn gravity on
+
+                knight.setLinearVelocity(new Vec2(0, -1));
+
+                lastDashEndTime = stepCount;
+            }
+        }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -199,10 +239,14 @@
             }else if (velocity.y > 0.001) {
                 newState = "jump";
 
+            }else if (isDashing) {
+                dashMovment();
+                newState = "dash";
+
             } else if (velocity.y < -0.001) {
                 newState = "fall";
 
-            } else if (Math.abs(velocity.x) > 0.1) {
+            } else if ((Math.abs(velocity.x) > 0.1) && !isDashing) {
                 newState = "walk";
 
             } else if (upPressed == true) {
@@ -265,6 +309,11 @@
 
                     case "jump":
                         img = jump(timeInState);
+                        img.setOffset(new Vec2(0, 0.2f));
+                        break;
+
+                    case "dash":
+                        img = dash(timeInState);
                         img.setOffset(new Vec2(0, 0.2f));
                         break;
 
@@ -443,6 +492,19 @@
 
 
 
+        // Dashing
+        public AttachedImage dash (int timeInState){
+            int frameIndex = timeInState / 2;
+
+            if (frameIndex >= knightDashImages.length) {
+                frameIndex = knightDashImages.length - 1;
+            }
+
+            return knight.addImage(knightDashImages[frameIndex]);
+        }
+
+
+
         // Falling
         public AttachedImage fall (){
             int knightFallIndex = (stepCount / 10) % knightFallImages.length;
@@ -612,6 +674,13 @@
 
         @Override
         public void postStep (StepEvent stepEvent){
+
+            // Makes sure dash stops and doesnt fly infinitely
+            if (isDashing) {
+                float direction = facingRight ? 1.0f : -1.0f;
+                knight.setLinearVelocity(new Vec2(dashSpeed * direction, 0));
+            }
+
         }
 
 

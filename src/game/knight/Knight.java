@@ -12,6 +12,8 @@ public class Knight extends Walker {
     private int health;
     private int maxHealth = 5;
 
+    private long lastHitTime = 0;
+    private static final int invisFrames = 500;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +47,16 @@ public class Knight extends Walker {
     // HEALTH
 
     public void takeDamage(int damage) {
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastHitTime <= invisFrames){ // invis frames
+            return;
+        }
+
+        // Take Damage
         health = health - damage;
+        lastHitTime = currentTime;
+
 
         if (health <= 0) {
             die();

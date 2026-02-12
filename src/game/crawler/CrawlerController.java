@@ -115,27 +115,21 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
             }
         }
 
+
+        // Damage effect
         if (baseImg != null) {
             baseImg.setOffset(new Vec2(0, 0.1f));
-            // Assuming you have a 'movingRight' variable
-            // if (movingRight) baseImg.flipHorizontal();
+            if (movingRight) baseImg.flipHorizontal();
         }
 
-        // B. DRAW THE OVERLAY LAYER (Damage Effect)
-        // Only draw if the animation is active (0 to 5)
-        if (damageAnimFrame >= 0 && damageAnimFrame < SharedAssets.damageEffectImages.length) {
+        if (damageAnimFrame >= 0 && damageAnimFrame < SharedAssets.damageEffectImages.length) { // while animation frames are playiong
 
-            // Add the damage image ON TOP of the base image
-            AttachedImage effectImg = crawler.addImage(SharedAssets.damageEffectImages[damageAnimFrame]);
-
-            // Optional: Offset it slightly to center it
+            AttachedImage effectImg = crawler.addImage(SharedAssets.damageEffectImages[damageAnimFrame]); // adds effeect on top of current image
             effectImg.setOffset(new Vec2(0, 0.1f));
 
-            // Advance the frame for next time
             damageAnimFrame++;
         }
-        // If we ran out of frames, stop playing (-1)
-        else {
+        else { // stop playing animation when finished
             damageAnimFrame = -1;
         }
 
