@@ -6,11 +6,19 @@ import org.jbox2d.common.Vec2;
 
 public class KnightSlashCollision implements CollisionListener {
 
-    private Knight knight;
-    private String style;
+    // Initialise variables
 
-    // We pass the Knight and the Style (e.g., "downSlash") into the listener
-    public KnightSlashCollision(Knight knight, String style) {
+    private Knight knight;
+    private KnightController.State style;
+
+    private long lastHitTime = 0;
+    private static final int invisFrames = 500;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // COLLISIONS
+    public KnightSlashCollision(Knight knight, KnightController.State style) {
         this.knight = knight;
         this.style = style;
     }
@@ -19,29 +27,34 @@ public class KnightSlashCollision implements CollisionListener {
     public void collide(CollisionEvent e) {
         Body other = e.getOtherBody();
 
-        // 1. HIT AN ENEMY
+        // Hit Enemy
         if (other instanceof Crawler) {
             Crawler enemy = (Crawler) other;
             enemy.takeDamage(1);
 
-            // If we hit an enemy with a DOWN SLASH -> POGO!
-            if (style.equals("downSlash")) {
+            // Soul
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - lastHitTime <= invisFrames){ // invis frames (only get soul when enemy takes damage)
+                return;
+            }
+
+            knight.gainSoul();
+            lastHitTime = currentTime;
+
+
+            // Pogo
+            if (style == KnightController.State.downSlash) {
                 performPogo();
             }
         }
-
-        // 2. HIT THE FLOOR (Optional)
-        // If you want to pogo off the ground/platforms too:
-        else if (other instanceof StaticBody && style.equals("downSlash")) {
+        else if (other instanceof StaticBody && style == KnightController.State.downSlash) {
             performPogo();
         }
     }
 
     private void performPogo() {
-        // Stop current fall instantly
         knight.setLinearVelocity(new Vec2(knight.getLinearVelocity().x, 0));
-
-        // Apply upward boost (Adjust "15" to change bounce height)
         knight.setLinearVelocity(new Vec2(knight.getLinearVelocity().x, 20));
     }
 }

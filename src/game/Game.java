@@ -1,8 +1,7 @@
 package game;
 
 import city.cs.engine.*;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseEvent;
+
 import javax.swing.JFrame;
 
 import game.crawler.Crawler;
@@ -34,7 +33,7 @@ public class Game {
         platform3.setPosition(new Vec2(8.0F, 2.0F));
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         // PLACES CHARACTERS
@@ -74,7 +73,7 @@ public class Game {
         KnightController controller = new KnightController(knight);
         view.addKeyListener(controller);
         view.addMouseListener(controller);
-        world.addStepListener(controller); // Checks the movment
+        world.addStepListener(controller); // Checks the movement
 
 
         // Make The Window

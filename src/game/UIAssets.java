@@ -12,7 +12,7 @@ public class UIAssets {
     // HEALTH
 
 
-    // Brake Heart
+    // Break Heart
     public static final Image[] damageImages = {
             new ImageIcon("data/knight sprites/health/damage 1.png").getImage(),
             new ImageIcon("data/knight sprites/health/damage 2.png").getImage(),

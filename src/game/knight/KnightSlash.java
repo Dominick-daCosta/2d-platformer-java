@@ -33,7 +33,7 @@ public class KnightSlash extends DynamicBody {
             1.18f, -0.66f
     );
 
-    public KnightSlash(World world, Vec2 position, String state, boolean facingRight, Knight knight ) {
+    public KnightSlash(World world, Vec2 position, KnightController.State state, boolean facingRight, Knight knight ) {
         super(world);
 
         // Add the shapes
@@ -42,26 +42,28 @@ public class KnightSlash extends DynamicBody {
         new SolidFixture(this, shapeBotMid);
         new SolidFixture(this, shapeBot);
 
-        // Give it an invisible immage to fix random blocks appearing
+        // Give it an invisible image to fix random blocks appearing
         BodyImage invisibleImg = new BodyImage("data/knight sprites/invisible.png", 1.0f);
         this.addImage(invisibleImg);
 
-        // 1. Set Position
         this.setGravityScale(0);
         this.setPosition(position);
 
         // Rotate hitbox
-        if (state.equals("upSlash")) {
+        if (state == KnightController.State.upSlash) {
             this.setAngleDegrees(90);
+        }
 
-        } else if (state.equals("downSlash")) {
+        else if (state == KnightController.State.downSlash) {
             this.setAngleDegrees(-90);
+        }
 
-        } else {
+        else {
             // Normal Side Slash
             if (!facingRight) {
                 this.setAngleDegrees(180);
             }
+
         }
 
         this.addCollisionListener(new KnightSlashCollision(knight, state));

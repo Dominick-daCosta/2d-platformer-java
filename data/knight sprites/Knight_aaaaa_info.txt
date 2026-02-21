@@ -1,19 +1,10 @@
 version: 2
 type: animation
-name: Dash
+name: Focus End
 consistent_sprite_size: true
 enable_borders: false
 use_sprite_name: false
-sprites: 12
-0	Dash_000.png
-1	Dash_001.png
-2	Dash_002.png
-3	Dash_003.png
-4	Dash_004.png
-5	Dash_005.png
-6	Dash_006.png
-7	Dash_007.png
-8	Dash_008.png
-9	Dash_009.png
-10	Dash_010.png
-11	Dash_011.png
+sprites: 3
+0	Focus End_000.png
+1	Focus End_001.png
+2	Focus End_002.png

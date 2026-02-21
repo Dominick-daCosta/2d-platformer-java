@@ -4,12 +4,12 @@ import city.cs.engine.*;
 
 import java.awt.event.KeyAdapter;
 
-public class KnightAssets extends KeyAdapter {
+public class KnightAssets {
 
     // IMAGES
 
     // Idle
-    protected BodyImage[] knightIdleImages = {
+    public static final BodyImage[] IdleImages = {
             new BodyImage("data/knight sprites/idle 1.png", 6.0f),
             new BodyImage("data/knight sprites/idle 2.png", 6.0f),
             new BodyImage("data/knight sprites/idle 3.png", 6.0f),
@@ -23,7 +23,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Jump
-    protected BodyImage[] knightJumpImages = {
+    public static final BodyImage[] JumpImages = {
             new BodyImage("data/knight sprites/jump 1.png", 6.0f),
             new BodyImage("data/knight sprites/jump 2.png", 6.0f),
             new BodyImage("data/knight sprites/jump 3.png", 6.0f),
@@ -34,7 +34,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Walk
-    protected BodyImage[] knightWalkImages = {
+    public static final BodyImage[] WalkImages = {
             new BodyImage("data/knight sprites/walk 1.png", 6.0f),
             new BodyImage("data/knight sprites/walk 2.png", 6.0f),
             new BodyImage("data/knight sprites/walk 3.png", 6.0f),
@@ -45,7 +45,7 @@ public class KnightAssets extends KeyAdapter {
     };
 
     // Dash
-    protected BodyImage[] knightDashImages = {
+    public static final BodyImage[] DashImages = {
             new BodyImage("data/knight sprites/dash 1.png", 6.0f),
             new BodyImage("data/knight sprites/dash 2.png", 6.0f),
             new BodyImage("data/knight sprites/dash 3.png", 6.0f),
@@ -57,7 +57,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Fall
-    protected BodyImage[] knightFallImages = {
+    public static final BodyImage[] FallImages = {
             new BodyImage("data/knight sprites/fall 1.png", 6.0f),
             new BodyImage("data/knight sprites/fall 2.png", 6.0f),
             new BodyImage("data/knight sprites/fall 3.png", 6.0f),
@@ -68,7 +68,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Look Up
-    protected BodyImage[] knightLookUpImages = {
+    public static final BodyImage[] LookUpImages = {
             new BodyImage("data/knight sprites/look up 1.png", 6.0f),
             new BodyImage("data/knight sprites/look up 2.png", 6.0f),
             new BodyImage("data/knight sprites/look up 3.png", 6.0f),
@@ -79,7 +79,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Look Down
-    protected BodyImage[] knightLookDownImages = {
+    public static final BodyImage[] LookDownImages = {
             new BodyImage("data/knight sprites/look down 1.png", 6.0f),
             new BodyImage("data/knight sprites/look down 2.png", 6.0f),
             new BodyImage("data/knight sprites/look down 3.png", 6.0f),
@@ -90,7 +90,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Slash
-    protected BodyImage[] knightSlashImages = {
+    public static final BodyImage[] SlashImages = {
             new BodyImage("data/knight sprites/slash 1.png", 6.0f),
             new BodyImage("data/knight sprites/slash 2.png", 6.0f),
             new BodyImage("data/knight sprites/slash 3.png", 6.0f),
@@ -101,7 +101,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Slash Effect
-    protected BodyImage[] knightSlashEffectImages = {
+    public static final BodyImage[] SlashEffectImages = {
             new BodyImage("data/knight sprites/slash effect 1.png", 6.0f),
             new BodyImage("data/knight sprites/slash effect 2.png", 6.0f),
             new BodyImage("data/knight sprites/slash effect 3.png", 6.0f),
@@ -112,7 +112,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Alternate Slash
-    protected BodyImage[] knightSlashAltImages = {
+    public static final BodyImage[] SlashAltImages = {
             new BodyImage("data/knight sprites/slash alt 1.png", 6.0f),
             new BodyImage("data/knight sprites/slash alt 2.png", 6.0f),
             new BodyImage("data/knight sprites/slash alt 3.png", 6.0f),
@@ -123,7 +123,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Alternate Slash Effect
-    protected BodyImage[] knightSlashEffectAltImages = {
+    public static final BodyImage[] SlashEffectAltImages = {
             new BodyImage("data/knight sprites/slash effect alt 1.png", 6.0f),
             new BodyImage("data/knight sprites/slash effect alt 2.png", 6.0f),
             new BodyImage("data/knight sprites/slash effect alt 3.png", 6.0f),
@@ -134,7 +134,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Down Slash
-    protected BodyImage[] knightDownSlashImages = {
+    public static final BodyImage[] DownSlashImages = {
             new BodyImage("data/knight sprites/down slash 1.png", 6.0f),
             new BodyImage("data/knight sprites/down slash 2.png", 6.0f),
             new BodyImage("data/knight sprites/down slash 3.png", 6.0f),
@@ -145,7 +145,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Down Slash Effect
-    protected BodyImage[] knightDownSlashEffectImages = {
+    public static final BodyImage[] DownSlashEffectImages = {
             new BodyImage("data/knight sprites/down slash effect 1.png", 6.0f),
             new BodyImage("data/knight sprites/down slash effect 2.png", 6.0f),
             new BodyImage("data/knight sprites/down slash effect 3.png", 6.0f),
@@ -156,7 +156,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     // Up Slash
-    protected BodyImage[] knightUpSlashImages = {
+    public static final BodyImage[] UpSlashImages = {
             new BodyImage("data/knight sprites/up slash 1.png", 6.0f),
             new BodyImage("data/knight sprites/up slash 2.png", 6.0f),
             new BodyImage("data/knight sprites/up slash 3.png", 6.0f),
@@ -167,7 +167,7 @@ public class KnightAssets extends KeyAdapter {
 
 
     //Up Slash Effect
-    protected BodyImage[] knightUpSlashEffectImages = {
+    public static final BodyImage[] UpSlashEffectImages = {
             new BodyImage("data/knight sprites/up slash effect 1.png", 6.0f),
             new BodyImage("data/knight sprites/up slash effect 2.png", 6.0f),
             new BodyImage("data/knight sprites/up slash effect 3.png", 6.0f),
@@ -176,8 +176,22 @@ public class KnightAssets extends KeyAdapter {
             new BodyImage("data/knight sprites/up slash effect 6.png", 6.0f),
     };
 
+    // Healing
+    public static final BodyImage[] HealingImages = {
+            new BodyImage("data/knight sprites/healing 1.png", 6.0f),
+            new BodyImage("data/knight sprites/healing 2.png", 6.0f),
+            new BodyImage("data/knight sprites/healing 3.png", 6.0f),
+            new BodyImage("data/knight sprites/healing 4.png", 6.0f),
+            new BodyImage("data/knight sprites/healing 5.png", 6.0f),
+            new BodyImage("data/knight sprites/healing 6.png", 6.0f),
+            new BodyImage("data/knight sprites/healing end 1.png", 6.0f),
+            new BodyImage("data/knight sprites/healing end 2.png", 6.0f),
+            new BodyImage("data/knight sprites/healing end 3.png", 6.0f),
+    };
+
+
     //Death
-    protected BodyImage[] knightDeathImages = {
+    public static final BodyImage[] DeathImages = {
             new BodyImage("data/knight sprites/death 1.png", 6.0f),
             new BodyImage("data/knight sprites/death 2.png", 6.0f),
             new BodyImage("data/knight sprites/death 3.png", 6.0f),

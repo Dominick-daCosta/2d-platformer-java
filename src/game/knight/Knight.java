@@ -12,6 +12,9 @@ public class Knight extends Walker {
     private int health;
     private int maxHealth = 5;
 
+    private int soul = 0;
+    private int maxSoul = 4;
+
     private long lastHitTime = 0;
     private static final int invisFrames = 500;
 
@@ -84,10 +87,19 @@ public class Knight extends Walker {
             return health;
         }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Soul (Magic power)
+
+    public void gainSoul (){
+        if (soul != maxSoul){
+            soul ++;
+        }
+    }
 
 
 
-
+    public int getSoul() {return soul;}
 
 
 

@@ -10,7 +10,7 @@ public class Crawler extends Walker {
     // Initialise Variables
 
     private int damage = 1;
-    private int health = 2;
+    private int health = 10;
 
     private long lastHitTime = 0;
     private static final int invisFrames = 500;
