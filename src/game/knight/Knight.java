@@ -18,16 +18,16 @@ public class Knight extends Walker {
     private long lastHitTime = 0;
     private static final int invisFrames = 500;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Hitbox
     private static final Shape knightHitbox = new PolygonShape(
-            -0.66f, -1.60f, //Bottom left side
+            -0.66f, -1.60f, // Bottom left side
             -0.14f, -2.6f, // Bottom left foot
             0.32f, -2.6f, // Bottom right foot
             0.72f, -1.66f, // Bottom right side
-            0.72f,  0.92f, // Top right
-            -0.66f,  0.89f  // Top left
+            0.72f, 0.92f, // Top right
+            -0.66f, 0.89f // Top left
     );
 
     public Knight(World world) {
@@ -45,14 +45,14 @@ public class Knight extends Walker {
         mainFixture.setFriction(0.01f);
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // HEALTH
 
     public void takeDamage(int damage) {
         long currentTime = System.currentTimeMillis();
 
-        if (currentTime - lastHitTime <= invisFrames){ // invis frames
+        if (currentTime - lastHitTime <= invisFrames) { // invis frames
             return;
         }
 
@@ -60,12 +60,10 @@ public class Knight extends Walker {
         health = health - damage;
         lastHitTime = currentTime;
 
-
         if (health <= 0) {
             die();
         }
     }
-
 
     // Death Logic
 
@@ -80,46 +78,34 @@ public class Knight extends Walker {
         }
     }
 
-
-
-
     public int knightGetHealth() {
-            return health;
-        }
+        return health;
+    }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Soul (Magic power)
 
-    public void gainSoul (){
-        if (soul != maxSoul){
-            soul ++;
+    public void gainSoul() {
+        if (soul != maxSoul) {
+            soul++;
         }
     }
 
+    public int getSoul() {
+        return soul;
+    }
 
+    public void looseSoul() {
+        if (soul > 0) {
+            soul--;
+        }
+    }
 
-    public int getSoul() {return soul;}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public void gainHealth() {
+        if (health < maxHealth) {
+            health++;
+        }
+    }
 
 }

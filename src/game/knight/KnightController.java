@@ -10,15 +10,12 @@ import java.awt.event.KeyEvent;
 public class KnightController implements StepListener, MouseListener, java.awt.event.KeyListener {
     private final Knight knight;
 
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // DEFAULT VARIABLES
 
-    //DEFAULT VARIABLES
-
-    // Constricts what states are allowed
     public enum State {
-        idle, walk, jump, fall, dash, slash, upSlash, downSlash, lookUp, lookDown, dead
+        idle, walk, jump, fall, dash, slash, upSlash, downSlash, lookUp, lookDown, dead, healing
     }
 
     // Constants
@@ -29,7 +26,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     private static final int dashCooldown = 20;
     private static final int comboTolerance = 20;
 
-
     // Input Polling
     private boolean leftPressed, rightPressed, upPressed, downPressed, spacePressed, shiftPressed;
     private boolean rightClicked, leftClicked;
@@ -38,7 +34,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     private boolean attackProcessed = false;
     private boolean dashProcessed = false;
 
-
     // Game State
     private State currentState = State.idle;
     private boolean facingRight = true;
@@ -46,7 +41,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     private int stepCount = 0;
     private int stateStartTime = 0;
-
 
     // Attacking
     private boolean isSlashing = false;
@@ -59,17 +53,18 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     private int startDashTime;
     private int lastDashEndTime = -100;
 
+    // Healing Tracking
+    private boolean isHealing = false;
+    private boolean wasHealingPressed = false;
+    private int healingPressStartTime = 0;
 
     public KnightController(Knight knight) {
         this.knight = knight;
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     // MOUSE INPUT
-
 
     // If a Button Is Pressed
     @Override
@@ -87,7 +82,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             rightClicked = true;
         }
     }
-
 
     // If The Button Is Released
     @Override
@@ -108,12 +102,19 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     }
 
     // Required empty methods for MouseListener
-    @Override public void mouseClicked(MouseEvent e) {}
-    @Override public void mouseEntered(MouseEvent e) {}
-    @Override public void mouseExited(MouseEvent e) {}
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void mouseExited(MouseEvent e) {
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // KEYBOARD INPUT
 
@@ -123,22 +124,34 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         int keyPressed = e.getKeyCode();
 
         // Move Left
-        if (keyPressed == KeyEvent.VK_LEFT || keyPressed == KeyEvent.VK_A) {leftPressed = true;}
+        if (keyPressed == KeyEvent.VK_LEFT || keyPressed == KeyEvent.VK_A) {
+            leftPressed = true;
+        }
 
         // Move Right
-        if (keyPressed == KeyEvent.VK_RIGHT || keyPressed == KeyEvent.VK_D) {rightPressed = true;}
+        if (keyPressed == KeyEvent.VK_RIGHT || keyPressed == KeyEvent.VK_D) {
+            rightPressed = true;
+        }
 
         // Look Up
-        if (keyPressed == KeyEvent.VK_UP || keyPressed == KeyEvent.VK_W) {upPressed = true;}
+        if (keyPressed == KeyEvent.VK_UP || keyPressed == KeyEvent.VK_W) {
+            upPressed = true;
+        }
 
         // Look Down
-        if (keyPressed == KeyEvent.VK_DOWN || keyPressed == KeyEvent.VK_S) {downPressed = true;}
+        if (keyPressed == KeyEvent.VK_DOWN || keyPressed == KeyEvent.VK_S) {
+            downPressed = true;
+        }
 
         // Jump
-        if (keyPressed == KeyEvent.VK_SPACE) {spacePressed = true;}
+        if (keyPressed == KeyEvent.VK_SPACE) {
+            spacePressed = true;
+        }
 
         // Spells/Heal
-        if (keyPressed == KeyEvent.VK_SHIFT) {shiftPressed = true;}
+        if (keyPressed == KeyEvent.VK_SHIFT) {
+            shiftPressed = true;
+        }
 
     }
 
@@ -148,16 +161,24 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         int keyPressed = e.getKeyCode();
 
         // Stop Moving Left
-        if (keyPressed == KeyEvent.VK_LEFT || keyPressed == KeyEvent.VK_A) {leftPressed = false;}
+        if (keyPressed == KeyEvent.VK_LEFT || keyPressed == KeyEvent.VK_A) {
+            leftPressed = false;
+        }
 
         // Stop Moving Right
-        if (keyPressed == KeyEvent.VK_RIGHT || keyPressed == KeyEvent.VK_D) {rightPressed = false;}
+        if (keyPressed == KeyEvent.VK_RIGHT || keyPressed == KeyEvent.VK_D) {
+            rightPressed = false;
+        }
 
         // Stop Looking Up
-        if (keyPressed == KeyEvent.VK_UP || keyPressed == KeyEvent.VK_W) {upPressed = false;}
+        if (keyPressed == KeyEvent.VK_UP || keyPressed == KeyEvent.VK_W) {
+            upPressed = false;
+        }
 
         // Stop Looking Down
-        if (keyPressed == KeyEvent.VK_DOWN || keyPressed == KeyEvent.VK_S) {downPressed = false;}
+        if (keyPressed == KeyEvent.VK_DOWN || keyPressed == KeyEvent.VK_S) {
+            downPressed = false;
+        }
 
         // Slow Down Jump
         if (keyPressed == KeyEvent.VK_SPACE) {
@@ -171,20 +192,42 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
 
         // Spells/Heal
-        if (keyPressed == KeyEvent.VK_SHIFT) {shiftPressed = false;}
+        if (keyPressed == KeyEvent.VK_SHIFT) {
+            shiftPressed = false;
+        }
 
     }
 
     // Required empty methods for KeyListener
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void preStep(StepEvent stepEvent) {
         stepCount++;
+
+        // Healing Input Tracking
+        if (shiftPressed && !wasHealingPressed) {
+            healingPressStartTime = stepCount;
+        }
+
+        if (shiftPressed) {
+            int holdDuration = stepCount - healingPressStartTime;
+            if (holdDuration >= 30 && !isHealing && knight.getSoul() > 0 && knight.knightGetHealth() < 5) {
+                isHealing = true;
+            }
+            // Stop healing if conditions unmet
+            if (isHealing && (knight.getSoul() <= 0 || knight.knightGetHealth() == 5)) {
+                isHealing = false;
+            }
+        } else {
+            isHealing = false;
+        }
+
+        wasHealingPressed = shiftPressed;
 
         pollInputs();
         updatePhysics();
@@ -192,7 +235,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // MANAGE INPUTS
 
@@ -228,8 +271,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
     }
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // MOVEMENT
 
@@ -259,7 +301,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             return;
         }
 
-
         // Walking
 
         if (leftPressed && !rightPressed) { // Go left
@@ -276,7 +317,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
     }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void updateAnimation() {
 
@@ -290,15 +331,24 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             newState = State.dead;
 
             if (isDashing) { // Makes sure knight stops when it dies
-                isDashing = false; knight.setGravityScale(1.0f);
+                isDashing = false;
+                knight.setGravityScale(1.0f);
             }
         }
 
         // Slashing
         else if (isSlashing) {
-            if (upPressed) newState = State.upSlash;
-            else if (downPressed && velocity.y != 0) newState = State.downSlash;
-            else newState = State.slash;
+            if (upPressed)
+                newState = State.upSlash;
+            else if (downPressed && velocity.y != 0)
+                newState = State.downSlash;
+            else
+                newState = State.slash;
+        }
+
+        // Healing
+        else if (isHealing) {
+            newState = State.healing;
         }
 
         // Dashing
@@ -331,94 +381,103 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             newState = State.lookDown;
         }
 
-
         boolean stateChanged = (newState != currentState);
         boolean directionChanged = (facingRight != lastFacingRight);
 
-        if (stateChanged) stateStartTime = stepCount;
+        if (stateChanged)
+            stateStartTime = stepCount;
 
         // Animation Speed
         if (!stateChanged && !directionChanged) {
-            if (newState == State.idle && stepCount % 5 != 0) return;
-            if (newState == State.walk && stepCount % 10 != 0) return;
-            if (newState == State.fall && stepCount % 5 != 0) return;
+            if (newState == State.idle && stepCount % 5 != 0)
+                return;
+            if (newState == State.walk && stepCount % 10 != 0)
+                return;
+            if (newState == State.fall && stepCount % 5 != 0)
+                return;
         }
 
         knight.removeAllImages();
         AttachedImage img;
         int timeInState = stepCount - stateStartTime;
 
-        if (timeInState < 0) {  // Prevents animations from having a negative number
+        if (timeInState < 0) { // Prevents animations from having a negative number
             timeInState = 0;
         }
-
 
         switch (newState) {
 
             case slash:
                 img = slash(timeInState);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case upSlash:
                 img = upSlash(timeInState);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case downSlash:
                 img = downSlash(timeInState);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case jump:
                 img = getFrame(KnightAssets.JumpImages, timeInState, 10);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case dash:
                 img = getFrame(KnightAssets.DashImages, timeInState, 2);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case fall:
                 img = getFrame(KnightAssets.FallImages, stepCount, 10);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case walk:
                 img = getFrame(KnightAssets.WalkImages, stepCount, 10);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case lookUp:
                 img = lookUp(timeInState);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case lookDown:
                 img = lookDown(timeInState);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             case dead:
                 img = die(timeInState);
-                img.setOffset(new Vec2(0, 3.0f)); break;
+                img.setOffset(new Vec2(0, 3.0f));
+                break;
+
+            case healing:
+                img = healingAnim(timeInState);
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
 
             default:
                 img = getFrame(KnightAssets.IdleImages, stepCount, 10);
-                img.setOffset(new Vec2(0, 0.2f)); break;
+                img.setOffset(new Vec2(0, 0.2f));
+                break;
         }
 
         updateSlashHitbox(newState);
-        if (facingRight) img.flipHorizontal();
+        if (facingRight)
+            img.flipHorizontal();
 
         currentState = newState;
         lastFacingRight = facingRight;
 
     }
 
-
-
-
-
-
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void postStep(StepEvent stepEvent) {
@@ -430,11 +489,9 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
     }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // HELPER METHODS
-
 
     // Animation Control ( Idle, Walk, Jump, Dash)
     private AttachedImage getFrame(BodyImage[] frames, int time, int speed) {
@@ -442,14 +499,14 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         return knight.addImage(frames[index]);
     }
 
-
     // Slash
 
     public AttachedImage slash(int timeInState) {
 
         // Which Slash Animation Should be Used
         BodyImage[] currentSlashAnim = useAltSlash ? KnightAssets.SlashAltImages : KnightAssets.SlashImages;
-        BodyImage[] currentEffectAnim = useAltSlash ? KnightAssets.SlashEffectAltImages : KnightAssets.SlashEffectImages;
+        BodyImage[] currentEffectAnim = useAltSlash ? KnightAssets.SlashEffectAltImages
+                : KnightAssets.SlashEffectImages;
 
         int slashIndex = timeInState / 2;
 
@@ -465,15 +522,16 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         // Slash Effect
         if (slashIndex > 0) {
             int effectIndex = slashIndex - 1;
-            if (effectIndex < currentEffectAnim.length) { // Only play the effect after 1 frame of the slash has happened
+            if (effectIndex < currentEffectAnim.length) { // Only play the effect after 1 frame of the slash has
+                                                          // happened
                 AttachedImage effectImg = knight.addImage(currentEffectAnim[effectIndex]);
                 effectImg.setOffset(new Vec2(-1.2f, 0));
-                if (facingRight) effectImg.flipHorizontal();
+                if (facingRight)
+                    effectImg.flipHorizontal();
             }
         }
         return img;
     }
-
 
     // Up Slash
 
@@ -481,7 +539,9 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
         int slashIndex = timeInState / 2;
         if (slashIndex >= KnightAssets.UpSlashImages.length) {
-            isSlashing = false; lastSlashEndTime = stepCount; slashIndex = KnightAssets.UpSlashImages.length - 1;
+            isSlashing = false;
+            lastSlashEndTime = stepCount;
+            slashIndex = KnightAssets.UpSlashImages.length - 1;
         }
 
         AttachedImage img = knight.addImage(KnightAssets.UpSlashImages[slashIndex]);
@@ -492,19 +552,21 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             if (effectIndex < KnightAssets.UpSlashEffectImages.length) {
                 AttachedImage effectImg = knight.addImage(KnightAssets.UpSlashEffectImages[effectIndex]);
                 effectImg.setOffset(new Vec2(0, 1.5f));
-                if (facingRight) effectImg.flipHorizontal();
+                if (facingRight)
+                    effectImg.flipHorizontal();
             }
         }
         return img;
     }
-
 
     // Down Slash
 
     public AttachedImage downSlash(int timeInState) {
         int slashIndex = timeInState / 2;
         if (slashIndex >= KnightAssets.DownSlashImages.length) {
-            isSlashing = false; lastSlashEndTime = stepCount; slashIndex = KnightAssets.DownSlashImages.length - 1;
+            isSlashing = false;
+            lastSlashEndTime = stepCount;
+            slashIndex = KnightAssets.DownSlashImages.length - 1;
         }
         AttachedImage img = knight.addImage(KnightAssets.DownSlashImages[slashIndex]);
 
@@ -514,12 +576,12 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             if (effectIndex < KnightAssets.DownSlashEffectImages.length) {
                 AttachedImage effectImg = knight.addImage(KnightAssets.DownSlashEffectImages[effectIndex]);
                 effectImg.setOffset(new Vec2(0, -2.0f));
-                if (facingRight) effectImg.flipHorizontal();
+                if (facingRight)
+                    effectImg.flipHorizontal();
             }
         }
         return img;
     }
-
 
     // Look Up
 
@@ -529,7 +591,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         return knight.addImage(KnightAssets.LookUpImages[renderIndex]);
     }
 
-
     // Look Down
 
     public AttachedImage lookDown(int timeInState) {
@@ -538,7 +599,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         return knight.addImage(KnightAssets.LookDownImages[renderIndex]);
     }
 
-
     // Die
 
     public AttachedImage die(int timeInState) {
@@ -546,7 +606,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
         // Stop Everything
         knight.stopWalking();
-        knight.setLinearVelocity(new Vec2(0,0));
+        knight.setLinearVelocity(new Vec2(0, 0));
         knight.removeAllCollisionListeners();
         knight.setGravityScale(0);
 
@@ -558,17 +618,35 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         return knight.addImage(KnightAssets.DeathImages[index]); // Play death animation
     }
 
+    // Healing
+    private AttachedImage healingAnim(int timeInState) {
+        if (timeInState > 0 && timeInState % 100 == 0) {
+            knight.gainHealth();
+            knight.looseSoul();
+        }
+        int index = timeInState / 10;
+        int renderIndex = (index < 2) ? index : 2 + ((index - 2) % (KnightAssets.HealingImages.length - 2));
+        return knight.addImage(KnightAssets.HealingImages[renderIndex]);
+    }
 
     // Slash Hitbox
     private void updateSlashHitbox(State newState) {
-        boolean isAnySlash = (newState == State.slash || newState == State.upSlash || newState == State.downSlash); // If about to slash this is true
-        boolean wasAnySlash = (currentState == State.slash || currentState == State.upSlash || currentState == State.downSlash); //If currently slashing this is true
+        boolean isAnySlash = (newState == State.slash || newState == State.upSlash || newState == State.downSlash); // If
+                                                                                                                    // about
+                                                                                                                    // to
+                                                                                                                    // slash
+                                                                                                                    // this
+                                                                                                                    // is
+                                                                                                                    // true
+        boolean wasAnySlash = (currentState == State.slash || currentState == State.upSlash
+                || currentState == State.downSlash); // If currently slashing this is true
 
         if (isAnySlash && !wasAnySlash) { // If about to slash and not currently slashing
             currentSlashBox = new KnightSlash(knight.getWorld(), knight.getPosition(), newState, facingRight, knight);
         }
 
-        if (!isAnySlash && wasAnySlash && currentSlashBox != null) { // If not about to slash and not currently slashing and if there is a slash hitbox
+        if (!isAnySlash && wasAnySlash && currentSlashBox != null) { // If not about to slash and not currently slashing
+                                                                     // and if there is a slash hitbox
             currentSlashBox.destroy();
             currentSlashBox = null;
         }
@@ -578,12 +656,14 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
             // Up Slash Offset
             if (newState == State.upSlash) {
-                offsetX = -0.5f; offsetY = 1.8f;
+                offsetX = -0.5f;
+                offsetY = 1.8f;
             }
 
             // Down Slash Offset
             else if (newState == State.downSlash) {
-                offsetX = 0.5f; offsetY = -2.2f;
+                offsetX = 0.5f;
+                offsetY = -2.2f;
             }
 
             // Regular Slash
