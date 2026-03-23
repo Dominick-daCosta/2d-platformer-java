@@ -10,7 +10,7 @@ import java.awt.event.KeyEvent;
 public class KnightController implements StepListener, MouseListener, java.awt.event.KeyListener {
     private final Knight knight;
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // DEFAULT VARIABLES
 
@@ -20,8 +20,8 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     // Constants
     private static final float jumpPower = 34.0f;
-    private static final float walkSpeed = 7.0f;
-    private static final float dashSpeed = 25.0f;
+    private static final float walkSpeed = 12.0f;
+    private static final float dashSpeed = 30.0f;
     private static final int dashDuration = 15;
     private static final int dashCooldown = 20;
     private static final int comboTolerance = 20;
@@ -52,17 +52,23 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     private boolean isDashing = false;
     private int startDashTime;
     private int lastDashEndTime = -100;
+    private boolean dashedInAir = false;
 
     // Healing Tracking
     private boolean isHealing = false;
     private boolean wasHealingPressed = false;
     private int healingPressStartTime = 0;
 
+    // Move Camera When Looking
+    private float cameraOffsetY = 0f;
+    private static final float maxCameraOffset = 8.0f;
+    private static final float cameraSpeed = 0.2f;
+
     public KnightController(Knight knight) {
         this.knight = knight;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // MOUSE INPUT
 
@@ -114,7 +120,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     public void mouseExited(MouseEvent e) {
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // KEYBOARD INPUT
 
@@ -203,7 +209,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     public void keyTyped(KeyEvent e) {
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void preStep(StepEvent stepEvent) {
@@ -232,13 +238,13 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         pollInputs();
         updatePhysics();
         updateAnimation();
+        updateCamera();
 
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // MANAGE INPUTS
-
     private void pollInputs() {
 
         // Jump
@@ -261,20 +267,26 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
 
         // Dash
+
+        boolean isGrounded = Math.abs(knight.getLinearVelocity().y) <= 0.0001f;
+        if (isGrounded && !isDashing) {
+            dashedInAir = false;
+        }
+
         if (rightClicked && !dashProcessed) {
             dashProcessed = true;
 
-            if (!isDashing && (stepCount - lastDashEndTime) > dashCooldown) {
+            if ((!isDashing && (stepCount - lastDashEndTime) > dashCooldown) && !dashedInAir) {
                 startDashTime = stepCount;
                 isDashing = true;
+                dashedInAir = true;
             }
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // MOVEMENT
-
     private void updatePhysics() {
 
         // Dash
@@ -288,9 +300,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
                 float direction = facingRight ? 1.0f : -1.0f;
 
                 knight.setLinearVelocity(new Vec2(dashSpeed * direction, 0));
-            }
-
-            else {
+            } else {
                 // Dash End
                 isDashing = false;
                 knight.setGravityScale(1.0f);
@@ -317,7 +327,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void updateAnimation() {
 
@@ -477,7 +487,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void postStep(StepEvent stepEvent) {
@@ -489,7 +499,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // HELPER METHODS
 
@@ -523,7 +533,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         if (slashIndex > 0) {
             int effectIndex = slashIndex - 1;
             if (effectIndex < currentEffectAnim.length) { // Only play the effect after 1 frame of the slash has
-                                                          // happened
+                // happened
                 AttachedImage effectImg = knight.addImage(currentEffectAnim[effectIndex]);
                 effectImg.setOffset(new Vec2(-1.2f, 0));
                 if (facingRight)
@@ -595,6 +605,14 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     public AttachedImage lookDown(int timeInState) {
         int index = timeInState / 10;
+
+        /*
+         * (index == 0) ? 0 : -> Plays frame 0 once at the very beginning.
+         * 1 +                -> Offsets the math so we never draw frame 0 again.
+         * (index - 1)        -> Shifts the time backward by 1 to account for the intro frame.
+         * % (length - 1)     -> Forces the remaining frames to loop endlessly.
+         */
+
         int renderIndex = (index == 0) ? 0 : 1 + ((index - 1) % (KnightAssets.LookDownImages.length - 1));
         return knight.addImage(KnightAssets.LookDownImages[renderIndex]);
     }
@@ -629,15 +647,13 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         return knight.addImage(KnightAssets.HealingImages[renderIndex]);
     }
 
+
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     // Slash Hitbox
     private void updateSlashHitbox(State newState) {
-        boolean isAnySlash = (newState == State.slash || newState == State.upSlash || newState == State.downSlash); // If
-                                                                                                                    // about
-                                                                                                                    // to
-                                                                                                                    // slash
-                                                                                                                    // this
-                                                                                                                    // is
-                                                                                                                    // true
+        boolean isAnySlash = (newState == State.slash || newState == State.upSlash || newState == State.downSlash); // If about to slash this is true
         boolean wasAnySlash = (currentState == State.slash || currentState == State.upSlash
                 || currentState == State.downSlash); // If currently slashing this is true
 
@@ -646,7 +662,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
 
         if (!isAnySlash && wasAnySlash && currentSlashBox != null) { // If not about to slash and not currently slashing
-                                                                     // and if there is a slash hitbox
+            // and if there is a slash hitbox
             currentSlashBox.destroy();
             currentSlashBox = null;
         }
@@ -675,4 +691,51 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             currentSlashBox.setPosition(knight.getPosition().add(new Vec2(offsetX, offsetY)));
         }
     }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    private void updateCamera() {
+
+        // Pan Up
+        if (currentState == State.lookUp) {
+            if (cameraOffsetY < maxCameraOffset) {
+                cameraOffsetY += cameraSpeed;
+            }
+        }
+        // Pan Down
+        else if (currentState == State.lookDown) {
+            if (cameraOffsetY > -maxCameraOffset) {
+                cameraOffsetY -= cameraSpeed;
+            }
+        }
+        // Return Camera
+        else {
+            if (cameraOffsetY > 0) {
+                cameraOffsetY = Math.max(0, cameraOffsetY - cameraSpeed);
+
+            }
+            else if (cameraOffsetY < 0) {
+                cameraOffsetY = Math.min(0, cameraOffsetY + cameraSpeed);
+            }
+
+            /*
+            Min and Max means that the camera will never over shoot the original position and shake
+            */
+        }
+    }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // GETTERS
+
+    public float getCameraOffsetY() {
+        return cameraOffsetY;
+    }
+
+
+
+
 }

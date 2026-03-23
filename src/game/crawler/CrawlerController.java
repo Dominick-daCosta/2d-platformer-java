@@ -55,7 +55,7 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-        // --- MOVEMENT LOGIC ---
+        // MOVEMENT
 
         if (!isDead) {
             if (movingRight && crawler.getPosition().x > rightBound) {
@@ -124,7 +124,7 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
 
         if (damageAnimFrame >= 0 && damageAnimFrame < SharedAssets.damageEffectImages.length) { // while animation frames are playiong
 
-            AttachedImage effectImg = crawler.addImage(SharedAssets.damageEffectImages[damageAnimFrame]); // adds effeect on top of current image
+            AttachedImage effectImg = crawler.addImage(SharedAssets.damageEffectImages[damageAnimFrame]); // adds effect on top of current image
             effectImg.setOffset(new Vec2(0, 0.1f));
 
             damageAnimFrame++;

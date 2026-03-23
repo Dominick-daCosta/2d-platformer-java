@@ -33,6 +33,37 @@ public class Game {
         platform3.setPosition(new Vec2(8.0F, 2.0F));
 
 
+        StaticBody platform4 = new StaticBody(world, platformShape);
+        platform4.setPosition(new Vec2(-0.0F, 9.0F));
+
+        StaticBody platform5 = new StaticBody(world, platformShape);
+        platform5.setPosition(new Vec2(-8.0F, 16.0F));
+
+        StaticBody platform6 = new StaticBody(world, platformShape);
+        platform6.setPosition(new Vec2(8.0F, 16.0F));
+
+
+        StaticBody platform7 = new StaticBody(world, platformShape);
+        platform7.setPosition(new Vec2(-0.0F, 24.0F));
+
+        StaticBody platform8 = new StaticBody(world, platformShape);
+        platform8.setPosition(new Vec2(-8.0F, 31.0F));
+
+        StaticBody platform9 = new StaticBody(world, platformShape);
+        platform9.setPosition(new Vec2(8.0F, 31.0F));
+
+
+
+        StaticBody platform10 = new StaticBody(world, platformShape);
+        platform10.setPosition(new Vec2(-0.0F, 38.0F));
+
+        StaticBody platform11 = new StaticBody(world, platformShape);
+        platform11.setPosition(new Vec2(-8.0F, 45.0F));
+
+        StaticBody platform12 = new StaticBody(world, platformShape);
+        platform12.setPosition(new Vec2(8.0F, 45.0F));
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -41,18 +72,12 @@ public class Game {
         // KNIGHT
         Knight knight = new Knight(world);
 
-        // Add the Initial Image
-        knight.addImage(new BodyImage("data/knight sprites/idle 1.png", 4.0F));
-
         // Collision Listener
         knight.addCollisionListener(new KnightCollision(knight));
 
 
         // Crawler
         Crawler enemy = new Crawler(world);
-
-        // Add the Initial Image
-        knight.addImage(new BodyImage("data/crawler sprites/walk 1.png", 4.0F));
 
         enemy.setPosition(new Vec2(0, 0));
         CrawlerController enemyAI = new CrawlerController(enemy, 3.0f);
@@ -74,6 +99,11 @@ public class Game {
         view.addKeyListener(controller);
         view.addMouseListener(controller);
         world.addStepListener(controller); // Checks the movement
+
+
+        // Camera Tracker
+        CameraTracker tracker = new CameraTracker(view, knight, controller);
+        world.addStepListener(tracker);
 
 
         // Make The Window
