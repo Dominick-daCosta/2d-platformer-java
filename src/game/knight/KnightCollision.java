@@ -6,6 +6,10 @@ import org.jbox2d.common.Vec2;
 
 public class KnightCollision implements CollisionListener {
 
+    private final int knockbackY = 13;
+    private final int knockbackX = 15;
+
+
     private Knight knight;
 
     public KnightCollision(Knight knight) {
@@ -19,8 +23,12 @@ public class KnightCollision implements CollisionListener {
 
             Crawler enemy = (Crawler) e.getOtherBody();
             int damageToTake = enemy.getDamage(); // Checks the damage the enemy does
-            knight.takeDamage(damageToTake);
-            knight.setLinearVelocity(new Vec2(5, 10)); // Knockback
+
+            if (knight.takeDamage(damageToTake)) { // Makes sure invis frames aren't happening
+                // Knockback
+                float knockDirection = (knight.getPosition().x < enemy.getPosition().x) ? -knockbackX : knockbackX;
+                knight.applyKnockback(new Vec2(knockDirection, knockbackY));
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ public class Crawler extends Walker {
     private int health = 10;
 
     private long lastHitTime = 0;
-    private static final int invisFrames = 500;
+    private static final int invisFrames = 400;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +37,7 @@ public class Crawler extends Walker {
         super(world, bottomShape);
         new SolidFixture(this, topShape);
 
-        BodyImage crawlerImg = new BodyImage("data/crawler sprites/walk 1.png", 4.0f);
+        BodyImage crawlerImg = new BodyImage("data/images/crawler sprites/walk 1.png", 4.0f);
         AttachedImage img = this.addImage(crawlerImg);
     }
 

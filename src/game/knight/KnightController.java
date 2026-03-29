@@ -25,16 +25,25 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     private static final int dashDuration = 15;
     private static final int dashCooldown = 20;
     private static final int comboTolerance = 20;
+    private static final int slashSpeed = 3;
 
     // Input Polling
     private boolean leftPressed, rightPressed, upPressed, downPressed, spacePressed, shiftPressed;
     private boolean rightClicked, leftClicked;
 
-    private boolean jumpProcessed = false; // Used to check if action is done or not
+    private boolean jumpProcessed = false;
     private boolean attackProcessed = false;
     private boolean dashProcessed = false;
 
+    // Audio Polling
+    private boolean triggerJumpSound = false;
+    private boolean triggerSlashSound = false;
+    private boolean triggerDashSound = false;
+    private boolean triggerHealSound = false;
+
     // Game State
+    private State previousState = State.idle;
+    private boolean stateChanged = false;
     private State currentState = State.idle;
     private boolean facingRight = true;
     private boolean lastFacingRight = true;
@@ -58,6 +67,9 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     private boolean isHealing = false;
     private boolean wasHealingPressed = false;
     private int healingPressStartTime = 0;
+    private boolean isFinishingHeal = false;
+    private int finishHealStartTime = 0;
+    private boolean lastIsHealing = false;
 
     // Move Camera When Looking
     private float cameraOffsetY = 0f;
@@ -215,30 +227,12 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     public void preStep(StepEvent stepEvent) {
         stepCount++;
 
-        // Healing Input Tracking
-        if (shiftPressed && !wasHealingPressed) {
-            healingPressStartTime = stepCount;
-        }
-
-        if (shiftPressed) {
-            int holdDuration = stepCount - healingPressStartTime;
-            if (holdDuration >= 30 && !isHealing && knight.getSoul() > 0 && knight.knightGetHealth() < 5) {
-                isHealing = true;
-            }
-            // Stop healing if conditions unmet
-            if (isHealing && (knight.getSoul() <= 0 || knight.knightGetHealth() == 5)) {
-                isHealing = false;
-            }
-        } else {
-            isHealing = false;
-        }
-
-        wasHealingPressed = shiftPressed;
-
         pollInputs();
         updatePhysics();
         updateAnimation();
         updateCamera();
+        processAudio();
+        updateHealing();
 
     }
 
@@ -247,39 +241,44 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     // MANAGE INPUTS
     private void pollInputs() {
 
+        boolean isGrounded = Math.abs(knight.getLinearVelocity().y) <= 0.0001f;
+
         // Jump
-        if (spacePressed && !jumpProcessed) {
+        if (spacePressed && !jumpProcessed && isGrounded) {
             knight.jump(jumpPower);
             jumpProcessed = true;
+
+            triggerJumpSound = true;
         }
 
         // Attack
         if (leftClicked && !attackProcessed) {
-            attackProcessed = true;
 
             if (!isSlashing) {
+                attackProcessed = true;
                 isSlashing = true;
                 stateStartTime = stepCount;
 
                 int timeSinceLastAttack = stepCount - lastSlashEndTime;
                 useAltSlash = (timeSinceLastAttack < comboTolerance) && !useAltSlash;
+                triggerSlashSound = true;
             }
         }
 
         // Dash
-
-        boolean isGrounded = Math.abs(knight.getLinearVelocity().y) <= 0.0001f;
         if (isGrounded && !isDashing) {
             dashedInAir = false;
         }
 
         if (rightClicked && !dashProcessed) {
-            dashProcessed = true;
 
             if ((!isDashing && (stepCount - lastDashEndTime) > dashCooldown) && !dashedInAir) {
+                dashProcessed = true;
                 startDashTime = stepCount;
                 isDashing = true;
                 dashedInAir = true;
+
+                triggerDashSound = true;
             }
         }
     }
@@ -288,6 +287,19 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     // MOVEMENT
     private void updatePhysics() {
+
+        // Knockback
+        knight.decrementStunTimer();
+        if (knight.isStunned()) {
+            return; // Ignore everything if the knight is stunned
+        }
+
+        // Locks During Healing
+        if (isHealing || isFinishingHeal) {
+            knight.stopWalking();
+            knight.setLinearVelocity(new Vec2(0, knight.getLinearVelocity().y)); // Keep gravity, kill sideways momentum
+            return; // Ignore dash and walk inputs completely!
+        }
 
         // Dash
         if (isDashing) {
@@ -300,6 +312,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
                 float direction = facingRight ? 1.0f : -1.0f;
 
                 knight.setLinearVelocity(new Vec2(dashSpeed * direction, 0));
+
             } else {
                 // Dash End
                 isDashing = false;
@@ -312,7 +325,6 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
 
         // Walking
-
         if (leftPressed && !rightPressed) { // Go left
             knight.startWalking(-walkSpeed);
             facingRight = false;
@@ -357,7 +369,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         }
 
         // Healing
-        else if (isHealing) {
+        else if (isHealing || isFinishingHeal) {
             newState = State.healing;
         }
 
@@ -391,11 +403,16 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             newState = State.lookDown;
         }
 
-        boolean stateChanged = (newState != currentState);
+        stateChanged = (newState != currentState);
         boolean directionChanged = (facingRight != lastFacingRight);
 
-        if (stateChanged)
+        if (stateChanged) {
+            previousState = currentState; // Capture what we WERE doing!
+        }
+
+        if (stateChanged) {
             stateStartTime = stepCount;
+        }
 
         // Animation Speed
         if (!stateChanged && !directionChanged) {
@@ -486,8 +503,114 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         lastFacingRight = facingRight;
 
     }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private void processAudio() {
+
+        // Jump Sound
+        if (triggerJumpSound) {
+            playSound(KnightAssets.jumpSound);
+            triggerJumpSound = false;
+        }
+
+        // Slash Sound
+        if (triggerSlashSound) {
+            if (useAltSlash) {
+                playSound(KnightAssets.altSlashSound);
+            } else {
+                playSound(KnightAssets.slashSound);
+            }
+
+            triggerSlashSound = false;
+        }
+
+        // Dash Sound
+        if (triggerDashSound) {
+            playSound(KnightAssets.dashSound);
+            triggerDashSound = false;
+        }
+
+        // Healing Sound
+        if (triggerHealSound) {
+            playSound(KnightAssets.healSound);
+            triggerHealSound = false;
+        }
+
+        // Dying Sound
+        if (stateChanged && currentState == State.dead) {
+            playSound(KnightAssets.deathSound);
+            playSound(KnightAssets.death2Sound);
+        }
+
+
+        // Walking Sound
+        if (stateChanged) {
+
+            // Start Walking
+            if (currentState == State.walk && KnightAssets.walkingSound != null) {
+                KnightAssets.walkingSound.loop();
+            }
+            // Stop Walking
+            else if (previousState == State.walk && KnightAssets.walkingSound != null) {
+                KnightAssets.walkingSound.stop();
+            }
+        }
+
+
+        // Healing Sound
+
+        // 1. Check if we are physically crouching right now
+        boolean currentlyChanneling = isHealing && (currentState == State.healing);
+
+        // 2. If we JUST started crouching, loop the sound!
+        if (currentlyChanneling && !lastIsHealing) {
+            if (KnightAssets.healingSound != null) KnightAssets.healingSound.loop();
+        }
+        // 3. If we JUST stopped crouching (stood up, or died), kill the sound!
+        else if (!currentlyChanneling && lastIsHealing) {
+            if (KnightAssets.healingSound != null) KnightAssets.healingSound.stop();
+        }
+
+        // 4. Update the memory for the next frame
+        lastIsHealing = currentlyChanneling;
+
+
+    }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    private void updateHealing() {
+        // Healing Input Tracking
+        if (shiftPressed && !wasHealingPressed) {
+            healingPressStartTime = stepCount;
+        }
+
+        if (shiftPressed) {
+            int holdDuration = stepCount - healingPressStartTime;
+
+            if (holdDuration >= 30 && !isHealing && !isFinishingHeal && knight.getSoul() > 0 && knight.knightGetHealth() < 5) {
+                isHealing = true;
+            }
+            if (isHealing && (knight.getSoul() <= 0 || knight.knightGetHealth() == 5)) {
+                isHealing = false;
+                isFinishingHeal = true;
+                finishHealStartTime = stepCount;
+            }
+        } else {
+            if (isHealing) {
+                isHealing = false;
+                isFinishingHeal = true;
+                finishHealStartTime = stepCount;
+            }
+        }
+        wasHealingPressed = shiftPressed;
+    }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     @Override
     public void postStep(StepEvent stepEvent) {
@@ -518,7 +641,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         BodyImage[] currentEffectAnim = useAltSlash ? KnightAssets.SlashEffectAltImages
                 : KnightAssets.SlashEffectImages;
 
-        int slashIndex = timeInState / 2;
+        int slashIndex = timeInState / slashSpeed;
 
         // Stop Slashing Animation
         if (slashIndex >= currentSlashAnim.length) {
@@ -547,7 +670,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     public AttachedImage upSlash(int timeInState) {
 
-        int slashIndex = timeInState / 2;
+        int slashIndex = timeInState / slashSpeed;
         if (slashIndex >= KnightAssets.UpSlashImages.length) {
             isSlashing = false;
             lastSlashEndTime = stepCount;
@@ -572,7 +695,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     // Down Slash
 
     public AttachedImage downSlash(int timeInState) {
-        int slashIndex = timeInState / 2;
+        int slashIndex = timeInState / slashSpeed;
         if (slashIndex >= KnightAssets.DownSlashImages.length) {
             isSlashing = false;
             lastSlashEndTime = stepCount;
@@ -620,7 +743,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     // Die
 
     public AttachedImage die(int timeInState) {
-        int index = timeInState / 5;
+        int index = timeInState / 8;
 
         // Stop Everything
         knight.stopWalking();
@@ -638,13 +761,42 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     // Healing
     private AttachedImage healingAnim(int timeInState) {
-        if (timeInState > 0 && timeInState % 100 == 0) {
-            knight.gainHealth();
-            knight.looseSoul();
+        int speed = 17;
+        int introFrames = 2;
+        int loopFrames = 4; // We have 4 looping frames (healing 3, 4, 5, 6)
+
+        // 1. THE "STAND UP" ANIMATION
+        if (isFinishingHeal) {
+            int timeFinishing = stepCount - finishHealStartTime;
+            int finishIndex = timeFinishing / speed;
+
+            if (finishIndex >= 3) { // We have 3 end frames (healing end 1, 2, 3)
+                isFinishingHeal = false; // Unlock the state!
+                finishIndex = 2; // Lock it to the final frame for the last split-second
+            }
+
+            // The end frames start at index 6 in your array
+            return knight.addImage(KnightAssets.HealingImages[6 + finishIndex]);
         }
-        int index = timeInState / 10;
-        int renderIndex = (index < 2) ? index : 2 + ((index - 2) % (KnightAssets.HealingImages.length - 2));
-        return knight.addImage(KnightAssets.HealingImages[renderIndex]);
+
+        // 2. THE "CHANNELING" ANIMATION
+        else {
+            int introDuration = introFrames * speed;
+            int loopDuration = loopFrames * speed;
+
+            // Trigger heal exactly when the looping animation completes a full cycle
+            if (timeInState > introDuration && (timeInState - introDuration) % loopDuration == 0) {
+                knight.gainHealth();
+                knight.looseSoul();
+
+                triggerHealSound = true;
+            }
+
+            int index = timeInState / speed;
+            int renderIndex = (index < introFrames) ? index : introFrames + ((index - introFrames) % loopFrames);
+
+            return knight.addImage(KnightAssets.HealingImages[renderIndex]);
+        }
     }
 
 
@@ -728,6 +880,18 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // Sound Effects
+    private void playSound(SoundClip sound) {
+        if (sound != null) {
+            sound.play();
+        }
+    }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     // GETTERS
 

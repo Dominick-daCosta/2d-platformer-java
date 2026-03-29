@@ -6,9 +6,9 @@ import game.SharedAssets;
 
 public class CrawlerController extends CrawlerAssets implements StepListener {
 
-    private Crawler crawler;
+    private final Crawler crawler;
 
-    private float speed = 2.0f;
+    private final float speed = 2.0f;
     private float leftBound;
     private float rightBound;
     private boolean movingRight = true;
@@ -46,8 +46,10 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
                 deathStartTime = stepCount;
 
                 crawler.stopWalking();
-                crawler.setLinearVelocity(new Vec2(0,0));
+                crawler.setLinearVelocity(new Vec2(0, 0));
                 crawler.removeAllCollisionListeners();
+
+                playSound(SharedAssets.deathSound); //Sound effect
             }
         }
 
@@ -75,7 +77,7 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
 
         int currentHealth = crawler.crawlerGetHealth();
 
-        if (currentHealth < lastHealth) { // if health has decreesed
+        if (currentHealth < lastHealth) { // if health has decreased
             damageAnimFrame = 0;
         }
         lastHealth = currentHealth;
@@ -96,25 +98,16 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
                 frameIndex = crawlerDeathImages.length - 1;
             }
 
-            AttachedImage img = crawler.addImage(crawlerDeathImages[frameIndex]);
-            img.setOffset(new Vec2(0, 0.1f));
+            baseImg = crawler.addImage(crawlerDeathImages[frameIndex]);
 
-            if (movingRight) img.flipHorizontal();
-
-        } else { // Walk animation
+        // Walk animation
+        } else {
 
 
             int walkIndex = (stepCount / 10) % crawlerWalkImages.length;
-            AttachedImage img = crawler.addImage(crawlerWalkImages[walkIndex]);
+            baseImg = crawler.addImage(crawlerWalkImages[walkIndex]);
 
-            img.setOffset(new Vec2(0, 0.1f));
-
-
-            if (movingRight) {
-                img.flipHorizontal();
-            }
         }
-
 
         // Damage effect
         if (baseImg != null) {
@@ -122,20 +115,38 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
             if (movingRight) baseImg.flipHorizontal();
         }
 
-        if (damageAnimFrame >= 0 && damageAnimFrame < SharedAssets.damageEffectImages.length) { // while animation frames are playiong
+        if (damageAnimFrame >= 0 && damageAnimFrame < SharedAssets.damageEffectImages.length) { // while animation frames are playing
 
             AttachedImage effectImg = crawler.addImage(SharedAssets.damageEffectImages[damageAnimFrame]); // adds effect on top of current image
             effectImg.setOffset(new Vec2(0, 0.1f));
 
+            // Sound Effect
+            if (damageAnimFrame == 0 && !isDead) {
+                playSound(SharedAssets.damageSound);
+            }
+
             damageAnimFrame++;
-        }
-        else { // stop playing animation when finished
+        } else { // stop playing animation when finished
             damageAnimFrame = -1;
         }
 
     }
 
+
     @Override
     public void postStep(StepEvent stepEvent) {
     }
+
+
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //  HELPER METHODS
+
+    // Sound Effects
+    private void playSound(SoundClip sound) {
+        if (sound != null) {
+            sound.play();
+        }
+    }
+
 }

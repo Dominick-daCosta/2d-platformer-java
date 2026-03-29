@@ -10,13 +10,16 @@ public class Knight extends Walker {
     // Initialise variables
 
     private int health;
-    private int maxHealth = 5;
+    private final int maxHealth = 5;
 
     private int soul = 0;
-    private int maxSoul = 4;
+    private final int maxSoul = 4;
 
     private long lastHitTime = 0;
     private static final int invisFrames = 500;
+    private int stunTimer = 0;
+
+    private int damageSoundIndex = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,14 +37,14 @@ public class Knight extends Walker {
         super(world, knightHitbox);
         this.health = maxHealth;
 
-        BodyImage knightImg = new BodyImage("data/knight sprites/idle 1.png", 6.0f);
+        BodyImage knightImg = new BodyImage("data/images/knight sprites/idle 1.png", 6.0f);
         AttachedImage img = this.addImage(knightImg);
         img.setOffset(new Vec2(0, 0.4f));
 
         this.setPosition(new Vec2(7.0f, -9.0f));
 
         // Friction
-        SolidFixture mainFixture = (SolidFixture) this.getFixtureList().get(0);
+        SolidFixture mainFixture = (SolidFixture) this.getFixtureList().getFirst();
         mainFixture.setFriction(0.01f);
     }
 
@@ -49,11 +52,11 @@ public class Knight extends Walker {
 
     // HEALTH
 
-    public void takeDamage(int damage) {
+    public boolean takeDamage(int damage) {
         long currentTime = System.currentTimeMillis();
 
         if (currentTime - lastHitTime <= invisFrames) { // invis frames
-            return;
+            return false;
         }
 
         // Take Damage
@@ -63,6 +66,8 @@ public class Knight extends Walker {
         if (health <= 0) {
             die();
         }
+
+        return true; // The hit was successful!
     }
 
     // Death Logic
@@ -81,6 +86,30 @@ public class Knight extends Walker {
     public int knightGetHealth() {
         return health;
     }
+
+    // Knockback Stun
+
+    public void applyKnockback(Vec2 force) {
+        this.setLinearVelocity(force);
+        this.stunTimer = 15;
+
+        // Play Sound
+        if (KnightAssets.damageSounds[damageSoundIndex] != null) {
+            KnightAssets.damageSounds[damageSoundIndex].play();
+        }
+        damageSoundIndex = (damageSoundIndex + 1) % KnightAssets.damageSounds.length; // Plays the sounds from the array
+    }
+
+    public void decrementStunTimer() {
+        if (stunTimer > 0) {
+            stunTimer--;
+        }
+    }
+
+    public boolean isStunned() {
+        return stunTimer > 0;
+    }
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

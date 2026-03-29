@@ -43,7 +43,7 @@ public class KnightSlash extends DynamicBody {
         new SolidFixture(this, shapeBot);
 
         // Give it an invisible image to fix random blocks appearing
-        BodyImage invisibleImg = new BodyImage("data/knight sprites/invisible.png", 1.0f);
+        BodyImage invisibleImg = new BodyImage("data/images/knight sprites/invisible.png", 1.0f);
         this.addImage(invisibleImg);
 
         this.setGravityScale(0);
