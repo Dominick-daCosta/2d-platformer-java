@@ -13,6 +13,22 @@ public class CameraTracker implements StepListener {
 
     public final float minimumYAxis = 0f;
 
+    // Leash Settings
+    private static final float maxDistanceX = 12.0f; // Camera "leash" to the knight (cant be further than this distance from the camera)
+    private static final float maxDistanceY = 2.0f;
+    private static final float smoothing = 0.08f;
+
+    // Camera Boundaries
+    private boolean isLeftLocked = false;
+    private float minLeftX = 0f;
+    private boolean isRightLocked = false;
+    private float minRightX = 0f;
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     // The Constructor gives the Tracker everything it needs to know
     public CameraTracker(GameView view, Knight knight, KnightController controller) {
         this.view = view;
@@ -33,10 +49,6 @@ public class CameraTracker implements StepListener {
         float targetX = knight.getPosition().x; // Where the camera should be
         float targetY = Math.max(minimumYAxis, knight.getPosition().y) + offset;
 
-
-        float maxDistanceX = 12.0f; // Camera "leash" to the knight (cant be further than this distance)
-        float maxDistanceY = 2.0f;
-
         float gapX = targetX - currentCamPos.x;
         float gapY = targetY - currentCamPos.y;
 
@@ -55,12 +67,35 @@ public class CameraTracker implements StepListener {
             currentCamPos.y = targetY + maxDistanceY;
         }
 
-        // "Lerp" Maths (smooths the camea tracking so it isn't snappy)
-        float smoothing = 0.08f;
+        // "Lerp" Maths (smooths the camera tracking so it isn't snappy)
         float newX = currentCamPos.x + (targetX - currentCamPos.x) * smoothing;
         float newY = currentCamPos.y + (targetY - currentCamPos.y) * smoothing;
+
+        // Boundary code
+        if (isLeftLocked) {
+            newX = Math.max(minLeftX, newX);
+        }
+
+        if (isRightLocked) {
+            newX = Math.min(minRightX, newX);
+        }
 
         view.setCentre(new Vec2(newX, newY));
 
     }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // HELPER METHODS
+
+    public void setLeftBoundary(float xCoordinate) {
+        this.isLeftLocked = true;
+        this.minLeftX = xCoordinate;
+    }
+
+    public void setRightBoundary(float xCoordinate) {
+        this.isRightLocked = true;
+        this.minRightX = xCoordinate;
+    }
+
 }

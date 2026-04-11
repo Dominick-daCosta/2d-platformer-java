@@ -8,7 +8,7 @@ public class CrawlerController extends CrawlerAssets implements StepListener {
 
     private final Crawler crawler;
 
-    private final float speed = 2.0f;
+    private final float speed = 3.0f;
     private float leftBound;
     private float rightBound;
     private boolean movingRight = true;

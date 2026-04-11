@@ -2,6 +2,7 @@ package game.knight;
 
 import city.cs.engine.*;
 import game.crawler.Crawler;
+import game.levels.objects.Spikes;
 import org.jbox2d.common.Vec2;
 
 public class KnightCollision implements CollisionListener {
@@ -25,10 +26,16 @@ public class KnightCollision implements CollisionListener {
             int damageToTake = enemy.getDamage(); // Checks the damage the enemy does
 
             if (knight.takeDamage(damageToTake)) { // Makes sure invis frames aren't happening
-                // Knockback
-                float knockDirection = (knight.getPosition().x < enemy.getPosition().x) ? -knockbackX : knockbackX;
-                knight.applyKnockback(new Vec2(knockDirection, knockbackY));
+                // Only knockback if the knight is still alive
+                if (knight.knightGetHealth() > 0) {
+                    // Knockback
+                    float knockDirection = (knight.getPosition().x < enemy.getPosition().x) ? -knockbackX : knockbackX;
+                    knight.applyKnockback(new Vec2(knockDirection, knockbackY));
+                }
             }
+        }
+        else if (e.getOtherBody() instanceof Spikes){
+            knight.takeDamage(10);
         }
     }
 }

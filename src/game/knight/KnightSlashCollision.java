@@ -2,6 +2,7 @@ package game.knight;
 
 import city.cs.engine.*;
 import game.crawler.Crawler;
+import game.levels.objects.BreakableWall;
 import org.jbox2d.common.Vec2;
 
 public class KnightSlashCollision implements CollisionListener {
@@ -10,6 +11,8 @@ public class KnightSlashCollision implements CollisionListener {
 
     private Knight knight;
     private KnightController.State style;
+
+    private final int slashDamage = 1;
 
     private long lastHitTime = 0;
     private static final int invisFrames = 500;
@@ -30,24 +33,34 @@ public class KnightSlashCollision implements CollisionListener {
         // Hit Enemy
         if (other instanceof Crawler) {
             Crawler enemy = (Crawler) other;
-            enemy.takeDamage(1);
+            enemy.takeDamage(slashDamage);
 
             // Soul
             long currentTime = System.currentTimeMillis();
-
             if (currentTime - lastHitTime <= invisFrames){ // invis frames (only get soul when enemy takes damage)
                 return;
             }
-
             knight.gainSoul();
             lastHitTime = currentTime;
 
 
-            // Pogo
+            // Pogo on Enemy
             if (style == KnightController.State.downSlash) {
                 performPogo();
             }
         }
+
+        // Hit Breakable Wall
+        else if (other instanceof BreakableWall) {
+            ((BreakableWall) other).takeDamage(slashDamage);
+
+            if (((BreakableWall) other).getHealth() == 0) {
+                other.destroy();
+            }
+
+        }
+
+        // Pogo on Floor
         else if (other instanceof StaticBody && style == KnightController.State.downSlash) {
             performPogo();
         }

@@ -1,115 +1,51 @@
 package game;
 
-import city.cs.engine.*;
-
 import javax.swing.JFrame;
-
-import game.crawler.Crawler;
-import game.crawler.CrawlerController;
-import org.jbox2d.common.Vec2;
 import java.awt.Color;
+import game.levels.GameLevel;
+import game.levels.Level1;
 import game.knight.*;
+import org.jbox2d.common.Vec2;
 
 public class Game {
+
+    private GameLevel currentLevel;
+    private final GameView view;
+
     public Game() {
-        World world = new World();
-        world.setGravity(60.0f);
 
-        new DebugViewer(world, 1024, 567);
+        // Initialise level
+        currentLevel = new Level1();
+        currentLevel.setGravity(60.0f); // Set your gravity here!
+        currentLevel.populate();
 
-        // Ground & Platform
-        Shape shape = new BoxShape(30.0F, 1.0F);
-        StaticBody ground = new StaticBody(world, shape);
-        ground.setPosition(new Vec2(0.0F, -13.5F));
-
-        Shape platformShape = new BoxShape(3.5F, 0.5F);
-        StaticBody platform1 = new StaticBody(world, platformShape);
-        platform1.setPosition(new Vec2(-0.0F, -5.0F));
-
-        StaticBody platform2 = new StaticBody(world, platformShape);
-        platform2.setPosition(new Vec2(-8.0F, 2.0F));
-
-        StaticBody platform3 = new StaticBody(world, platformShape);
-        platform3.setPosition(new Vec2(8.0F, 2.0F));
-
-
-        StaticBody platform4 = new StaticBody(world, platformShape);
-        platform4.setPosition(new Vec2(-0.0F, 9.0F));
-
-        StaticBody platform5 = new StaticBody(world, platformShape);
-        platform5.setPosition(new Vec2(-8.0F, 16.0F));
-
-        StaticBody platform6 = new StaticBody(world, platformShape);
-        platform6.setPosition(new Vec2(8.0F, 16.0F));
-
-
-        StaticBody platform7 = new StaticBody(world, platformShape);
-        platform7.setPosition(new Vec2(-0.0F, 24.0F));
-
-        StaticBody platform8 = new StaticBody(world, platformShape);
-        platform8.setPosition(new Vec2(-8.0F, 31.0F));
-
-        StaticBody platform9 = new StaticBody(world, platformShape);
-        platform9.setPosition(new Vec2(8.0F, 31.0F));
-
-
-
-        StaticBody platform10 = new StaticBody(world, platformShape);
-        platform10.setPosition(new Vec2(-0.0F, 38.0F));
-
-        StaticBody platform11 = new StaticBody(world, platformShape);
-        platform11.setPosition(new Vec2(-8.0F, 45.0F));
-
-        StaticBody platform12 = new StaticBody(world, platformShape);
-        platform12.setPosition(new Vec2(8.0F, 45.0F));
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        // PLACES CHARACTERS
-
-        // KNIGHT
-        Knight knight = new Knight(world);
-
-        // Collision Listener
-        knight.addCollisionListener(new KnightCollision(knight));
-
-
-        // Crawler
-        Crawler enemy = new Crawler(world);
-
-        enemy.setPosition(new Vec2(0, 0));
-        CrawlerController enemyAI = new CrawlerController(enemy, 3.0f);
-        world.addStepListener(enemyAI);
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        // VEIW
-
-        // Creates a View
-        GameView view = new GameView(world, knight, 1024, 567);
+        // Create The View
+        view = new GameView(currentLevel, currentLevel.getKnight(), 1024, 567);
         view.setBackground(Color.LIGHT_GRAY);
 
-
-        // Make The Controller
-        KnightController controller = new KnightController(knight);
+        // Knight Controller
+        KnightController controller = new KnightController(currentLevel.getKnight());
         view.addKeyListener(controller);
         view.addMouseListener(controller);
-        world.addStepListener(controller); // Checks the movement
-
+        currentLevel.addStepListener(controller);
 
         // Camera Tracker
-        CameraTracker tracker = new CameraTracker(view, knight, controller);
-        world.addStepListener(tracker);
+        CameraTracker tracker = new CameraTracker(view, currentLevel.getKnight(), controller);
 
+        if (currentLevel.isLeftLocked()) {
+            tracker.setLeftBoundary(currentLevel.getLeftBoundary());
+        }
 
-        // Make The Window
+        if (currentLevel.isRightLocked()) {
+            tracker.setRightBoundary(currentLevel.getRightBoundary());
+        }
+
+        currentLevel.addStepListener(tracker);
+
+        // Window
         JFrame frame = new JFrame("City Game");
         frame.add(view);
-        frame.setDefaultCloseOperation(3);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationByPlatform(true);
         frame.setResizable(false);
         frame.pack();
@@ -117,10 +53,23 @@ public class Game {
         view.requestFocus();
 
 
-        world.start();
+        // --- DEVELOPER TOOL: CLICK TO GET COORDINATES ---
+        view.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                // This converts the pixels on your screen into physical world coordinates!
+                Vec2 worldPoint = view.viewToWorld(e.getPoint());
+
+                // Prints the exact code you need to the console
+                System.out.println(".setPosition(new Vec2(" + worldPoint.x + "f, " + worldPoint.y + "f));");
+            }
+        });
+
+
+        currentLevel.start(); // Start the level
     }
 
-    public static void main(String[] args) {
+    static void main() {
         new Game();
     }
 }

@@ -3,11 +3,18 @@ package game.knight;
 import city.cs.engine.*;
 import org.jbox2d.common.Vec2;
 
+import java.awt.event.ActionListener;
+import javax.swing.Timer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 public class Knight extends Walker {
 
     // Initialise variables
+
+    private Vec2 respawnPosition;
+    private boolean isDead = false;
 
     private int health;
     private final int maxHealth = 5;
@@ -21,7 +28,7 @@ public class Knight extends Walker {
 
     private int damageSoundIndex = 0;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Hitbox
     private static final Shape knightHitbox = new PolygonShape(
@@ -34,24 +41,33 @@ public class Knight extends Walker {
     );
 
     public Knight(World world) {
-        super(world, knightHitbox);
+        super(world); // Call super without shape, we will add it in resetHitbox
         this.health = maxHealth;
+
+        resetHitbox();
 
         BodyImage knightImg = new BodyImage("data/images/knight sprites/idle 1.png", 6.0f);
         AttachedImage img = this.addImage(knightImg);
         img.setOffset(new Vec2(0, 0.4f));
 
         this.setPosition(new Vec2(7.0f, -9.0f));
+    }
 
-        // Friction
-        SolidFixture mainFixture = (SolidFixture) this.getFixtureList().getFirst();
+    public void resetHitbox() {
+        // Remove existing fixtures if any (to avoid duplicates)
+        List<Fixture> fixtures = this.getFixtureList();
+        for (int i = fixtures.size() - 1; i >= 0; i--) {
+            fixtures.get(i).destroy();
+        }
+
+        // Add the main hitbox
+        SolidFixture mainFixture = new SolidFixture(this, knightHitbox);
         mainFixture.setFriction(0.01f);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // HEALTH
-
     public boolean takeDamage(int damage) {
         long currentTime = System.currentTimeMillis();
 
@@ -70,9 +86,11 @@ public class Knight extends Walker {
         return true; // The hit was successful!
     }
 
-    // Death Logic
+    // Death
 
     public void die() {
+        if (isDead) return; // Already dead
+        isDead = true;
 
         List<Fixture> fixtures = this.getFixtureList(); // Gets Everything Thr Knight has
 
@@ -81,6 +99,27 @@ public class Knight extends Walker {
             Fixture f = fixtures.get(i);
             f.destroy();
         }
+
+
+        // Allows the death animation to play before respawning
+        Timer timer = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                respawn();
+            }
+        });
+
+        timer.setRepeats(false); //Dont allow the timer to repeat
+        timer.start();
+
+    }
+
+    public boolean isDead() {
+        return isDead;
+    }
+    
+    public void setDead(boolean dead) {
+        isDead = dead;
     }
 
     public int knightGetHealth() {
@@ -111,10 +150,9 @@ public class Knight extends Walker {
     }
 
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Soul (Magic power)
-
     public void gainSoul() {
         if (soul != maxSoul) {
             soul++;
@@ -136,5 +174,29 @@ public class Knight extends Walker {
             health++;
         }
     }
+
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Respawn
+
+    public void setRespawnPosition(Vec2 position) {
+        this.respawnPosition = position;
+    }
+
+    public void respawn() {
+        this.isDead = false;
+        this.health = maxHealth;
+        this.soul = 0;
+
+        resetHitbox();
+
+        // Move to respawn location TODO:
+        this.setLinearVelocity(new Vec2(0, 0));
+        this.setGravityScale(1.0f);
+        this.setPosition(respawnPosition);
+    }
+
+
+
 
 }

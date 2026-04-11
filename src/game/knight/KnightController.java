@@ -19,8 +19,8 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     }
 
     // Constants
-    private static final float jumpPower = 34.0f;
-    private static final float walkSpeed = 12.0f;
+    private static final float jumpPower = 34.0f; // Should be 34
+    private static final float walkSpeed = 12.0f; // Should be 12
     private static final float dashSpeed = 30.0f;
     private static final int dashDuration = 15;
     private static final int dashCooldown = 20;
@@ -290,8 +290,8 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
         // Knockback
         knight.decrementStunTimer();
-        if (knight.isStunned()) {
-            return; // Ignore everything if the knight is stunned
+        if (knight.isStunned() || knight.isDead()) {
+            return; // Ignore everything if the knight is stunned or dead
         }
 
         // Locks During Healing
@@ -559,19 +559,16 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
         // Healing Sound
 
-        // 1. Check if we are physically crouching right now
-        boolean currentlyChanneling = isHealing && (currentState == State.healing);
+        boolean currentlyChanneling = isHealing && (currentState == State.healing); // Checks if the Knight is croutching
 
-        // 2. If we JUST started crouching, loop the sound!
-        if (currentlyChanneling && !lastIsHealing) {
+        if (currentlyChanneling && !lastIsHealing) { // If just started crouching
             if (KnightAssets.healingSound != null) KnightAssets.healingSound.loop();
         }
-        // 3. If we JUST stopped crouching (stood up, or died), kill the sound!
-        else if (!currentlyChanneling && lastIsHealing) {
+
+        else if (!currentlyChanneling && lastIsHealing) { // If just stopped crouching
             if (KnightAssets.healingSound != null) KnightAssets.healingSound.stop();
         }
 
-        // 4. Update the memory for the next frame
         lastIsHealing = currentlyChanneling;
 
 
@@ -748,12 +745,10 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
         // Stop Everything
         knight.stopWalking();
         knight.setLinearVelocity(new Vec2(0, 0));
-        knight.removeAllCollisionListeners();
         knight.setGravityScale(0);
 
         if (index >= KnightAssets.DeathImages.length) { // When animation finishes delete the knight
             index = KnightAssets.DeathImages.length - 1;
-            knight.destroy();
         }
 
         return knight.addImage(KnightAssets.DeathImages[index]); // Play death animation
@@ -762,29 +757,27 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     // Healing
     private AttachedImage healingAnim(int timeInState) {
         int speed = 17;
-        int introFrames = 2;
-        int loopFrames = 4; // We have 4 looping frames (healing 3, 4, 5, 6)
+        int introFrames = 2; // Frames where the knight is crouching down
+        int loopFrames = 4; // Frames that are actually looped
 
-        // 1. THE "STAND UP" ANIMATION
+        // Stand Up Animation
         if (isFinishingHeal) {
             int timeFinishing = stepCount - finishHealStartTime;
             int finishIndex = timeFinishing / speed;
 
-            if (finishIndex >= 3) { // We have 3 end frames (healing end 1, 2, 3)
-                isFinishingHeal = false; // Unlock the state!
-                finishIndex = 2; // Lock it to the final frame for the last split-second
+            if (finishIndex >= 3) { // Last 3 frames are standing up
+                isFinishingHeal = false;
+                finishIndex = 2;
             }
-
-            // The end frames start at index 6 in your array
-            return knight.addImage(KnightAssets.HealingImages[6 + finishIndex]);
+            return knight.addImage(KnightAssets.HealingImages[6 + finishIndex]); // When animation finishes return final frame
         }
 
-        // 2. THE "CHANNELING" ANIMATION
+        // Chanaling Animation
         else {
             int introDuration = introFrames * speed;
             int loopDuration = loopFrames * speed;
 
-            // Trigger heal exactly when the looping animation completes a full cycle
+            // Trigger heal when the animation does a full loop
             if (timeInState > introDuration && (timeInState - introDuration) % loopDuration == 0) {
                 knight.gainHealth();
                 knight.looseSoul();
