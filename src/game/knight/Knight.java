@@ -15,6 +15,7 @@ public class Knight extends Walker {
 
     private Vec2 respawnPosition;
     private boolean isDead = false;
+    private boolean controlsEnabled = false;
 
     private int health;
     private final int maxHealth = 5;
@@ -202,6 +203,15 @@ public class Knight extends Walker {
         this.setLinearVelocity(new Vec2(0, 0));
         this.setGravityScale(1.0f);
         this.setPosition(respawnPosition);
+        this.controlsEnabled = false;
+    }
+
+    public boolean isControlsEnabled() {
+        return controlsEnabled;
+    }
+
+    public void setControlsEnabled(boolean controlsEnabled) {
+        this.controlsEnabled = controlsEnabled;
     }
 
 

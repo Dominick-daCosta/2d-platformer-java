@@ -3,6 +3,7 @@ package game.levels.objects;
 import city.cs.engine.*;
 
 public class BreakableWall extends StaticBody {
+    // Breakable Wall class for fragile environment objects
 
     private long lastHitTime = 0;
     private static final int invisFrames = 200;

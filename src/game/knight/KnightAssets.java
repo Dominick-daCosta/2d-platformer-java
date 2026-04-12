@@ -219,7 +219,7 @@ public class KnightAssets {
 
     // Sounds
 
-    public static SoundClip damageSound, dashSound, deathSound, death2Sound, fallingSound, healSound, healingSound, jumpSound, landingSound,
+    public static SoundClip damageSound, dashSound, deathSound, death2Sound, fallingSound, healSound, healingSound, heavyLandingSound, jumpSound, landingSound,
                             slashSound, altSlashSound, walkingSound;
 
     public static SoundClip[] damageSounds = new SoundClip[5]; // Uses an array to play the same sound multiple times overlapping
@@ -234,6 +234,7 @@ public class KnightAssets {
             fallingSound = new SoundClip("data/sounds/knight/falling.wav");
             healSound = new SoundClip("data/sounds/knight/heal.wav");
             healingSound = new SoundClip("data/sounds/knight/healing.wav");
+            heavyLandingSound = new SoundClip("data/sounds/knight/heavy landing.wav");
             jumpSound = new SoundClip("data/sounds/knight/jump.wav");
             landingSound = new SoundClip("data/sounds/knight/landing.wav");
             slashSound = new SoundClip("data/sounds/knight/slash.wav");
@@ -249,5 +250,24 @@ public class KnightAssets {
         }
     }
 
+    public static void stopAllSounds() {
+        if (damageSound != null) damageSound.stop();
+        if (dashSound != null) dashSound.stop();
+        if (deathSound != null) deathSound.stop();
+        if (death2Sound != null) death2Sound.stop();
+        if (fallingSound != null) fallingSound.stop();
+        if (healSound != null) healSound.stop();
+        if (healingSound != null) healingSound.stop();
+        if (heavyLandingSound != null) heavyLandingSound.stop();
+        if (jumpSound != null) jumpSound.stop();
+        if (landingSound != null) landingSound.stop();
+        if (slashSound != null) slashSound.stop();
+        if (altSlashSound != null) altSlashSound.stop();
+        if (walkingSound != null) walkingSound.stop();
+
+        for (SoundClip clip : damageSounds) {
+            if (clip != null) clip.stop();
+        }
+    }
 
 }

@@ -7,6 +7,7 @@ import game.knight.KnightCollision;
 import org.jbox2d.common.Vec2;
 import game.levels.GameLevel;
 import game.crawler.Crawler;
+import java.awt.Image;
 
 public class TestLevel extends GameLevel {
 
@@ -72,6 +73,16 @@ public class TestLevel extends GameLevel {
 
         CrawlerController enemyAI = new CrawlerController(enemy1, 3.0f);
         this.addStepListener(enemyAI);
+    }
+
+    @Override
+    public Image getBackground() {
+        return null;
+    }
+
+    @Override
+    public boolean isDashUnlocked() {
+        return true;
     }
 
 

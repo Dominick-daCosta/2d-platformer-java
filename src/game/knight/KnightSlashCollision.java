@@ -2,7 +2,6 @@ package game.knight;
 
 import city.cs.engine.*;
 import game.crawler.Crawler;
-import game.levels.objects.BreakableWall;
 import org.jbox2d.common.Vec2;
 
 public class KnightSlashCollision implements CollisionListener {
@@ -51,13 +50,14 @@ public class KnightSlashCollision implements CollisionListener {
         }
 
         // Hit Breakable Wall
-        else if (other instanceof BreakableWall) {
-            ((BreakableWall) other).takeDamage(slashDamage);
+        else if (other instanceof game.levels.objects.BreakableWall) {
+            // Force IDE re-detection
+            game.levels.objects.BreakableWall bWall = (game.levels.objects.BreakableWall) other;
+            bWall.takeDamage(slashDamage);
 
-            if (((BreakableWall) other).getHealth() == 0) {
+            if (bWall.getHealth() <= 0) {
                 other.destroy();
             }
-
         }
 
         // Pogo on Floor

@@ -8,17 +8,24 @@ import game.knight.KnightCollision;
 import game.levels.objects.BreakableWall;
 import game.levels.objects.Spikes;
 import org.jbox2d.common.Vec2;
+import javax.swing.ImageIcon;
+import java.awt.Image;
 
 public class Level1 extends GameLevel {
 
     public Level1(game.Game game) {
         super(game);
+        try {
+            backgroundMusic = new SoundClip("data/sounds/level 1.mp3");
+        } catch (Exception e) {
+            System.out.println("Error loading Level 1 music: " + e);
+        }
     }
 
     @Override
     public void populate() {
 
-        Vec2 startPosition = new Vec2(160, 0f);
+        Vec2 startPosition = new Vec2(0, 40f);
 
         setLeftBoundary(0.0f); // Camera Boundary
 
@@ -215,11 +222,15 @@ public class Level1 extends GameLevel {
         ground19.addImage(new BodyImage("data/images/level 1/floor.png", 3f)).setOffset(new Vec2(0f, 0f));
 
         StaticBody ground20 = new StaticBody(this, groundShape);
-        ground20.setPosition(new Vec2(225f, 25f));
+        ground20.setPosition(new Vec2(205f, 25f));
         ground20.addImage(new BodyImage("data/images/level 1/floor.png", 3f)).setOffset(new Vec2(0f, 0f));
 
+        StaticBody ground21 = new StaticBody(this, groundShape);
+        ground21.setPosition(new Vec2(225f, 25f));
+        ground21.addImage(new BodyImage("data/images/level 1/floor.png", 3f)).setOffset(new Vec2(0f, 0f));
+
         // Spikes
-        for (float x : new float[]{205f, 245f, 265f, 285f, 320f, 325f, 345f}) {
+        for (float x : new float[]{245f, 265f, 285f, 320f, 325f, 345f}) {
             Spikes spikes = new Spikes(this);
             spikes.setPosition(new Vec2(x, 23f));
             spikes.addImage(new BodyImage("data/images/level 1/spikes.png", 3f)).setOffset(new Vec2(0f, 0f));
@@ -257,6 +268,7 @@ public class Level1 extends GameLevel {
         // End Hole Walls
         float[] yPositions = {19f, 9f, -1f, -11f, -22f};
         for (float y : yPositions) {
+
             // Left end wall
             StaticBody wallL = new StaticBody(this, wallShape);
             wallL.setPosition(new Vec2(294.1f, y));
@@ -290,6 +302,16 @@ public class Level1 extends GameLevel {
         enemy2.setPosition(new Vec2(271.0f, 33.0f));
         CrawlerController enemy2AI = new CrawlerController(enemy2, 3.5f);
         this.addStepListener(enemy2AI);
+    }
+
+    @Override
+    public Image getBackground() {
+        return new ImageIcon("data/images/level 1/background.png").getImage();
+    }
+
+    @Override
+    public boolean isDashUnlocked() {
+        return false;
     }
 
 

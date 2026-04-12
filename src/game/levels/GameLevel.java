@@ -1,8 +1,10 @@
 package game.levels;
 
 import city.cs.engine.World;
+import city.cs.engine.SoundClip;
 import game.knight.Knight;
 import game.Game;
+import java.awt.Image;
 
 
 public abstract class GameLevel extends World {
@@ -15,6 +17,8 @@ public abstract class GameLevel extends World {
     private float leftBoundary = 0f;
     private boolean rightLocked = false;
     private float rightBoundary = 0f;
+
+    protected SoundClip backgroundMusic;
 
 
     public GameLevel(Game game) {
@@ -62,5 +66,21 @@ public abstract class GameLevel extends World {
     }
 
     public abstract void populate(); // Where the knight starts
+
+    public abstract Image getBackground();
+
+    public abstract boolean isDashUnlocked();
+
+    public void startMusic() {
+        if (backgroundMusic != null) {
+            backgroundMusic.loop();
+        }
+    }
+
+    public void stopMusic() {
+        if (backgroundMusic != null) {
+            backgroundMusic.stop();
+        }
+    }
 
 }

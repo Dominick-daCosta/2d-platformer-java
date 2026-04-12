@@ -41,8 +41,14 @@ public class CameraTracker implements StepListener {
 
     @Override
     public void postStep(StepEvent e) {
+        update();
+    }
 
-
+    /**
+     * Updates the camera position to track the knight.
+     * Can be called manually to synchronize position immediately.
+     */
+    public void update() {
         Vec2 currentCamPos = view.getCentre();
 
         float offset = controller.getCameraOffsetY();
@@ -81,7 +87,6 @@ public class CameraTracker implements StepListener {
         }
 
         view.setCentre(new Vec2(newX, newY));
-
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

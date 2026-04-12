@@ -37,5 +37,14 @@ public class KnightCollision implements CollisionListener {
         else if (e.getOtherBody() instanceof Spikes){
             knight.takeDamage(10);
         }
+        else if (e.getOtherBody() instanceof StaticBody) {
+            // Check if this is the first landing in the level
+            if (!knight.isControlsEnabled()) {
+                if (KnightAssets.heavyLandingSound != null) {
+                    KnightAssets.heavyLandingSound.play();
+                }
+            }
+            knight.setControlsEnabled(true);
+        }
     }
 }

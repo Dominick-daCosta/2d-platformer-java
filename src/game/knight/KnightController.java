@@ -62,6 +62,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
     private int startDashTime;
     private int lastDashEndTime = -100;
     private boolean dashedInAir = false;
+    private boolean dashUnlocked = true;
 
     // Healing Tracking
     private boolean isHealing = false;
@@ -78,6 +79,10 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
     public KnightController(Knight knight) {
         this.knight = knight;
+    }
+
+    public void setDashUnlocked(boolean dashUnlocked) {
+        this.dashUnlocked = dashUnlocked;
     }
 
     /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,6 +248,10 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
         boolean isGrounded = Math.abs(knight.getLinearVelocity().y) <= 0.0001f;
 
+        if (!knight.isControlsEnabled()) {
+            return;
+        }
+
         // Jump
         if (spacePressed && !jumpProcessed && isGrounded) {
             knight.jump(jumpPower);
@@ -270,7 +279,7 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
             dashedInAir = false;
         }
 
-        if (rightClicked && !dashProcessed) {
+        if (rightClicked && !dashProcessed && dashUnlocked) {
 
             if ((!isDashing && (stepCount - lastDashEndTime) > dashCooldown) && !dashedInAir) {
                 dashProcessed = true;
@@ -290,8 +299,11 @@ public class KnightController implements StepListener, MouseListener, java.awt.e
 
         // Knockback
         knight.decrementStunTimer();
-        if (knight.isStunned() || knight.isDead()) {
-            return; // Ignore everything if the knight is stunned or dead
+        if (knight.isStunned() || knight.isDead() || !knight.isControlsEnabled()) {
+            if (!knight.isControlsEnabled()) {
+                knight.stopWalking();
+            }
+            return; // Ignore everything if the knight is stunned, dead, or hasn't landed yet
         }
 
         // Locks During Healing

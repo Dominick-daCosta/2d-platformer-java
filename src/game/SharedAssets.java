@@ -35,5 +35,10 @@ public class SharedAssets {
         }
     }
 
+    public static void stopAllSounds() {
+        if (damageSound != null) damageSound.stop();
+        if (deathSound != null) deathSound.stop();
+    }
+
 
 }
