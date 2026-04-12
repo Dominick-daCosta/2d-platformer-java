@@ -1,6 +1,7 @@
 package game.levels;
 
 import city.cs.engine.*;
+import game.Game;
 import game.crawler.CrawlerController;
 import game.knight.KnightCollision;
 import org.jbox2d.common.Vec2;
@@ -8,6 +9,10 @@ import game.levels.GameLevel;
 import game.crawler.Crawler;
 
 public class TestLevel extends GameLevel {
+
+    public TestLevel(Game game) {
+        super(game);
+    }
 
     @Override
     public void populate() {
@@ -66,11 +71,8 @@ public class TestLevel extends GameLevel {
         enemy1.setPosition(new Vec2(-0.0F, -2.0F));
 
         CrawlerController enemyAI = new CrawlerController(enemy1, 3.0f);
-        this.addStepListener(enemyAI); // "this" refers to TestLevel!
+        this.addStepListener(enemyAI);
     }
 
-    @Override
-    public String getLevelName() {
-        return "TestLevel";
-    }
+
 }

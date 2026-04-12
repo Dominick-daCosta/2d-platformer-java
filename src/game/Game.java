@@ -5,6 +5,7 @@ import java.awt.Color;
 import game.levels.GameLevel;
 import game.levels.Level1;
 import game.knight.*;
+import game.levels.Level2;
 import org.jbox2d.common.Vec2;
 
 public class Game {
@@ -15,8 +16,8 @@ public class Game {
     public Game() {
 
         // Initialise level
-        currentLevel = new Level1();
-        currentLevel.setGravity(60.0f); // Set your gravity here!
+        currentLevel = new Level2(this);
+        currentLevel.setGravity(60.0f);
         currentLevel.populate();
 
         // Create The View
@@ -28,6 +29,9 @@ public class Game {
         view.addKeyListener(controller);
         view.addMouseListener(controller);
         currentLevel.addStepListener(controller);
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Camera Tracker
         CameraTracker tracker = new CameraTracker(view, currentLevel.getKnight(), controller);
@@ -41,6 +45,10 @@ public class Game {
         }
 
         currentLevel.addStepListener(tracker);
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
         // Window
         JFrame frame = new JFrame("City Game");
@@ -69,7 +77,54 @@ public class Game {
         currentLevel.start(); // Start the level
     }
 
-    static void main() {
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public void goToNextLevel() {
+
+        if (currentLevel instanceof Level1) {
+            // Memory of current stats
+            int currentHealth = currentLevel.getKnight().knightGetHealth();
+            int currentSoul = currentLevel.getKnight().getSoul();
+
+            currentLevel.stop();
+
+            // Makes the next level
+            currentLevel = new game.levels.Level2(this);
+            currentLevel.setGravity(60.0f);
+            currentLevel.populate();
+
+            // Set new stats
+            currentLevel.getKnight().setHealth(currentHealth);
+            currentLevel.getKnight().setSoul(currentSoul);
+
+            view.setWorld(currentLevel); // sets Camera to next level
+
+            // Creates a new knight
+            KnightController controller = new KnightController(currentLevel.getKnight());
+            for(java.awt.event.KeyListener kl : view.getKeyListeners()) { view.removeKeyListener(kl); }
+            for(java.awt.event.MouseListener ml : view.getMouseListeners()) { view.removeMouseListener(ml); }
+
+            view.addKeyListener(controller);
+            view.addMouseListener(controller);
+            currentLevel.addStepListener(controller);
+
+            // Update Camera
+            CameraTracker tracker = new CameraTracker(view, currentLevel.getKnight(), controller);
+            if (currentLevel.isLeftLocked()) tracker.setLeftBoundary(currentLevel.getLeftBoundary());
+            if (currentLevel.isRightLocked()) tracker.setRightBoundary(currentLevel.getRightBoundary());
+            currentLevel.addStepListener(tracker);
+
+            currentLevel.start(); // Start the new level
+
+        }
+    }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public static void main(String[] args) {
         new Game();
     }
 }

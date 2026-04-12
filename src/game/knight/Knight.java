@@ -126,6 +126,10 @@ public class Knight extends Walker {
         return health;
     }
 
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
     // Knockback Stun
 
     public void applyKnockback(Vec2 force) {
@@ -161,6 +165,10 @@ public class Knight extends Walker {
 
     public int getSoul() {
         return soul;
+    }
+
+    public void setSoul(int soul) {
+        this.soul = soul;
     }
 
     public void looseSoul() {

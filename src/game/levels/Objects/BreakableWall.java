@@ -9,7 +9,7 @@ public class BreakableWall extends StaticBody {
 
     private static final Shape wallShape = new BoxShape(1.0f, 5.0f);
 
-    private int health = 1;
+    private int health = 2;
 
     // Take Damage
     public void takeDamage(int damage) {

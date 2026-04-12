@@ -2,11 +2,13 @@ package game.levels;
 
 import city.cs.engine.World;
 import game.knight.Knight;
+import game.Game;
 
 
 public abstract class GameLevel extends World {
 
     private Knight knight;
+    private Game game;
 
     // Camera Boundaries
     private boolean leftLocked = false;
@@ -15,10 +17,15 @@ public abstract class GameLevel extends World {
     private float rightBoundary = 0f;
 
 
-    public GameLevel() {
-
+    public GameLevel(Game game) {
         super();
+        this.game = game;
         knight = new Knight(this); // Brings the Knight in to the level
+    }
+
+    // Gets what Level you are currently in
+    public Game getGame() {
+        return game;
     }
 
 
@@ -33,11 +40,21 @@ public abstract class GameLevel extends World {
         this.rightBoundary = rightBoundary;
     }
 
-    public boolean isLeftLocked() { return leftLocked; }
-    public float getLeftBoundary() { return leftBoundary; }
+    public boolean isLeftLocked() {
+        return leftLocked;
+    }
 
-    public boolean isRightLocked() { return rightLocked; }
-    public float getRightBoundary() { return rightBoundary; }
+    public float getLeftBoundary() {
+        return leftBoundary;
+    }
+
+    public boolean isRightLocked() {
+        return rightLocked;
+    }
+
+    public float getRightBoundary() {
+        return rightBoundary;
+    }
 
 
     public Knight getKnight() {
@@ -46,5 +63,4 @@ public abstract class GameLevel extends World {
 
     public abstract void populate(); // Where the knight starts
 
-    public abstract String getLevelName(); // Levels name (organisation)
 }
